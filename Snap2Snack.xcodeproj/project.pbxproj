@@ -1,0 +1,563 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXContainerItemProxy section */
+		55EB5D162E66554700C63BB0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 55EB5CFD2E66554600C63BB0 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 55EB5D042E66554600C63BB0;
+			remoteInfo = Snap2Snack;
+		};
+		55EB5D202E66554700C63BB0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 55EB5CFD2E66554600C63BB0 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 55EB5D042E66554600C63BB0;
+			remoteInfo = Snap2Snack;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		55EB5D052E66554600C63BB0 /* Snap2Snack.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Snap2Snack.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		55EB5D152E66554700C63BB0 /* Snap2SnackTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Snap2SnackTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		55EB5D1F2E66554700C63BB0 /* Snap2SnackUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Snap2SnackUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		55EB5D072E66554600C63BB0 /* Snap2Snack */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Snap2Snack;
+			sourceTree = "<group>";
+		};
+		55EB5D182E66554700C63BB0 /* Snap2SnackTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Snap2SnackTests;
+			sourceTree = "<group>";
+		};
+		55EB5D222E66554700C63BB0 /* Snap2SnackUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Snap2SnackUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		55EB5D022E66554600C63BB0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		55EB5D122E66554700C63BB0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		55EB5D1C2E66554700C63BB0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		55EB5CFC2E66554600C63BB0 = {
+			isa = PBXGroup;
+			children = (
+				55EB5D072E66554600C63BB0 /* Snap2Snack */,
+				55EB5D182E66554700C63BB0 /* Snap2SnackTests */,
+				55EB5D222E66554700C63BB0 /* Snap2SnackUITests */,
+				55EB5D062E66554600C63BB0 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		55EB5D062E66554600C63BB0 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				55EB5D052E66554600C63BB0 /* Snap2Snack.app */,
+				55EB5D152E66554700C63BB0 /* Snap2SnackTests.xctest */,
+				55EB5D1F2E66554700C63BB0 /* Snap2SnackUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		55EB5D042E66554600C63BB0 /* Snap2Snack */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 55EB5D292E66554700C63BB0 /* Build configuration list for PBXNativeTarget "Snap2Snack" */;
+			buildPhases = (
+				55EB5D012E66554600C63BB0 /* Sources */,
+				55EB5D022E66554600C63BB0 /* Frameworks */,
+				55EB5D032E66554600C63BB0 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				55EB5D072E66554600C63BB0 /* Snap2Snack */,
+			);
+			name = Snap2Snack;
+			packageProductDependencies = (
+			);
+			productName = Snap2Snack;
+			productReference = 55EB5D052E66554600C63BB0 /* Snap2Snack.app */;
+			productType = "com.apple.product-type.application";
+		};
+		55EB5D142E66554700C63BB0 /* Snap2SnackTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 55EB5D2C2E66554700C63BB0 /* Build configuration list for PBXNativeTarget "Snap2SnackTests" */;
+			buildPhases = (
+				55EB5D112E66554700C63BB0 /* Sources */,
+				55EB5D122E66554700C63BB0 /* Frameworks */,
+				55EB5D132E66554700C63BB0 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				55EB5D172E66554700C63BB0 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				55EB5D182E66554700C63BB0 /* Snap2SnackTests */,
+			);
+			name = Snap2SnackTests;
+			packageProductDependencies = (
+			);
+			productName = Snap2SnackTests;
+			productReference = 55EB5D152E66554700C63BB0 /* Snap2SnackTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		55EB5D1E2E66554700C63BB0 /* Snap2SnackUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 55EB5D2F2E66554700C63BB0 /* Build configuration list for PBXNativeTarget "Snap2SnackUITests" */;
+			buildPhases = (
+				55EB5D1B2E66554700C63BB0 /* Sources */,
+				55EB5D1C2E66554700C63BB0 /* Frameworks */,
+				55EB5D1D2E66554700C63BB0 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				55EB5D212E66554700C63BB0 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				55EB5D222E66554700C63BB0 /* Snap2SnackUITests */,
+			);
+			name = Snap2SnackUITests;
+			packageProductDependencies = (
+			);
+			productName = Snap2SnackUITests;
+			productReference = 55EB5D1F2E66554700C63BB0 /* Snap2SnackUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		55EB5CFD2E66554600C63BB0 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1620;
+				LastUpgradeCheck = 1620;
+				TargetAttributes = {
+					55EB5D042E66554600C63BB0 = {
+						CreatedOnToolsVersion = 16.2;
+					};
+					55EB5D142E66554700C63BB0 = {
+						CreatedOnToolsVersion = 16.2;
+						TestTargetID = 55EB5D042E66554600C63BB0;
+					};
+					55EB5D1E2E66554700C63BB0 = {
+						CreatedOnToolsVersion = 16.2;
+						TestTargetID = 55EB5D042E66554600C63BB0;
+					};
+				};
+			};
+			buildConfigurationList = 55EB5D002E66554600C63BB0 /* Build configuration list for PBXProject "Snap2Snack" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 55EB5CFC2E66554600C63BB0;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 55EB5D062E66554600C63BB0 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				55EB5D042E66554600C63BB0 /* Snap2Snack */,
+				55EB5D142E66554700C63BB0 /* Snap2SnackTests */,
+				55EB5D1E2E66554700C63BB0 /* Snap2SnackUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		55EB5D032E66554600C63BB0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		55EB5D132E66554700C63BB0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		55EB5D1D2E66554700C63BB0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		55EB5D012E66554600C63BB0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		55EB5D112E66554700C63BB0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		55EB5D1B2E66554700C63BB0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		55EB5D172E66554700C63BB0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 55EB5D042E66554600C63BB0 /* Snap2Snack */;
+			targetProxy = 55EB5D162E66554700C63BB0 /* PBXContainerItemProxy */;
+		};
+		55EB5D212E66554700C63BB0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 55EB5D042E66554600C63BB0 /* Snap2Snack */;
+			targetProxy = 55EB5D202E66554700C63BB0 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		55EB5D272E66554700C63BB0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		55EB5D282E66554700C63BB0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		55EB5D2A2E66554700C63BB0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"Snap2Snack/Preview Content\"";
+				DEVELOPMENT_TEAM = K29ZS5233J;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "paullieber07-gmail.com.Snap2Snack";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		55EB5D2B2E66554700C63BB0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"Snap2Snack/Preview Content\"";
+				DEVELOPMENT_TEAM = K29ZS5233J;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "paullieber07-gmail.com.Snap2Snack";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		55EB5D2D2E66554700C63BB0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K29ZS5233J;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "paullieber07-gmail.com.Snap2SnackTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Snap2Snack.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Snap2Snack";
+			};
+			name = Debug;
+		};
+		55EB5D2E2E66554700C63BB0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K29ZS5233J;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "paullieber07-gmail.com.Snap2SnackTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Snap2Snack.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Snap2Snack";
+			};
+			name = Release;
+		};
+		55EB5D302E66554700C63BB0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K29ZS5233J;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "paullieber07-gmail.com.Snap2SnackUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Snap2Snack;
+			};
+			name = Debug;
+		};
+		55EB5D312E66554700C63BB0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K29ZS5233J;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "paullieber07-gmail.com.Snap2SnackUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Snap2Snack;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		55EB5D002E66554600C63BB0 /* Build configuration list for PBXProject "Snap2Snack" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				55EB5D272E66554700C63BB0 /* Debug */,
+				55EB5D282E66554700C63BB0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		55EB5D292E66554700C63BB0 /* Build configuration list for PBXNativeTarget "Snap2Snack" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				55EB5D2A2E66554700C63BB0 /* Debug */,
+				55EB5D2B2E66554700C63BB0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		55EB5D2C2E66554700C63BB0 /* Build configuration list for PBXNativeTarget "Snap2SnackTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				55EB5D2D2E66554700C63BB0 /* Debug */,
+				55EB5D2E2E66554700C63BB0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		55EB5D2F2E66554700C63BB0 /* Build configuration list for PBXNativeTarget "Snap2SnackUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				55EB5D302E66554700C63BB0 /* Debug */,
+				55EB5D312E66554700C63BB0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 55EB5CFD2E66554600C63BB0 /* Project object */;
+}
