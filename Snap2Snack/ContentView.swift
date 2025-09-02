@@ -28,11 +28,11 @@ struct ContentView: View {
                 }
                 .tag(1)
             
-            // Glucose & Meds
-            GlucoseView()
+            // Reminders
+            RemindersView()
                 .tabItem {
-                    Image(systemName: "heart.fill")
-                    Text("Health")
+                    Image(systemName: "bell.fill")
+                    Text("Reminders")
                 }
                 .tag(2)
             
@@ -954,20 +954,10 @@ struct FridgeScanHistoryRow: View {
     }
 }
 
-// MARK: - Glucose & Medication View
-struct GlucoseView: View {
-    @State private var glucoseLevel = ""
+// MARK: - Reminders View
+struct RemindersView: View {
     @State private var showingAddReminder = false
     @State private var reminders: [Reminder] = []
-    @State private var glucoseHistory: [GlucoseEntry] = []
-    @State private var showingGlucoseChart = false
-    @State private var selectedTimeframe: TimeFrame = .week
-    
-    enum TimeFrame: String, CaseIterable {
-        case day = "24 Hours"
-        case week = "7 Days"
-        case month = "30 Days"
-    }
     
     var body: some View {
         NavigationView {
@@ -975,129 +965,23 @@ struct GlucoseView: View {
                 VStack(spacing: 20) {
                     // Header
                     VStack(spacing: 12) {
-                        Image(systemName: "heart.circle.fill")
+                        Image(systemName: "bell.circle.fill")
                             .font(.system(size: 60))
                             .foregroundColor(.green)
                         
-                        Text("Glucose & Medication")
+                        Text("Reminders")
                             .font(.largeTitle)
                             .fontWeight(.bold)
                             .foregroundColor(.green)
                             .multilineTextAlignment(.center)
                         
-                        Text("Track your health metrics and set reminders")
+                        Text("Set and manage your health reminders")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)
                     }
                     .frame(maxWidth: .infinity)
-                    
-                    // Glucose Input
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Current Glucose Level (mg/dL)")
-                            .font(.headline)
-                            .foregroundColor(.primary)
-                        
-                        HStack {
-                            TextField("Placeholder for glucose level input", text: $glucoseLevel)
-                                .keyboardType(.numberPad)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                .frame(height: 50)
-                            
-                            Button("Log") {
-                                logGlucose()
-                            }
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 12)
-                            .background(Color.green)
-                            .cornerRadius(10)
-                            .fontWeight(.semibold)
-                        }
-                        .padding(.horizontal)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    
-                    // Current Glucose Status
-                    if let lastEntry = glucoseHistory.first {
-                        GlucoseStatusView(level: lastEntry.level)
-                            .padding(.horizontal)
-                            .frame(maxWidth: .infinity)
-                    }
-                    
-                    // Quick Stats
-                    if !glucoseHistory.isEmpty {
-                        HStack(spacing: 16) {
-                            StatCard(
-                                title: "Average",
-                                value: "\(Int(glucoseHistory.prefix(7).map { $0.level }.reduce(0, +) / min(glucoseHistory.count, 7)))",
-                                unit: "mg/dL",
-                                color: .blue
-                            )
-                            
-                            StatCard(
-                                title: "Lowest",
-                                value: "\(glucoseHistory.map { $0.level }.min() ?? 0)",
-                                unit: "mg/dL",
-                                color: .green
-                            )
-                            
-                            StatCard(
-                                title: "Highest",
-                                value: "\(glucoseHistory.map { $0.level }.max() ?? 0)",
-                                unit: "mg/dL",
-                                color: .orange
-                            )
-                        }
-                        .padding(.horizontal)
-                        .frame(maxWidth: .infinity)
-                    }
-                    
-                    // Glucose Chart
-                    if !glucoseHistory.isEmpty {
-                        VStack(spacing: 16) {
-                            HStack {
-                                Text("Glucose Trends")
-                                    .font(.headline)
-                                    .foregroundColor(.primary)
-                                
-                                Spacer()
-                                
-                                Picker("Timeframe", selection: $selectedTimeframe) {
-                                    ForEach(TimeFrame.allCases, id: \.self) { timeframe in
-                                        Text(timeframe.rawValue).tag(timeframe)
-                                    }
-                                }
-                                .pickerStyle(SegmentedPickerStyle())
-                                .frame(width: 200)
-                            }
-                            .padding(.horizontal)
-                            
-                            GlucoseChartView(entries: getFilteredEntries(), timeframe: selectedTimeframe)
-                                .frame(height: 200)
-                                .padding(.horizontal)
-                        }
-                        .frame(maxWidth: .infinity)
-                    }
-                    
-                    // Recent Entries
-                    if !glucoseHistory.isEmpty {
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Recent Entries")
-                                .font(.headline)
-                                .foregroundColor(.primary)
-                                .padding(.horizontal)
-                            
-                            LazyVStack(spacing: 8) {
-                                ForEach(glucoseHistory.prefix(5)) { entry in
-                                    GlucoseHistoryRow(entry: entry)
-                                        .padding(.horizontal)
-                                }
-                            }
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    }
                     
                     // Reminders Section
                     VStack(alignment: .leading, spacing: 16) {
@@ -1155,60 +1039,19 @@ struct GlucoseView: View {
             AddReminderView(reminders: $reminders)
         }
         .onAppear {
-            loadSampleData()
+            loadSampleReminders()
         }
+
     }
     
-    private func logGlucose() {
-        guard let level = Int(glucoseLevel), level > 0 else { return }
-        
-        let entry = GlucoseEntry(level: level, timestamp: Date(), notes: "")
-        glucoseHistory.insert(entry, at: 0)
-        
-        // Keep only last 100 entries
-        if glucoseHistory.count > 100 {
-            glucoseHistory = Array(glucoseHistory.prefix(100))
-        }
-        
-        glucoseLevel = ""
-    }
+
     
-    private func getFilteredEntries() -> [GlucoseEntry] {
+
+    
+    private func loadSampleReminders() {
         let calendar = Calendar.current
         let now = Date()
         
-        switch selectedTimeframe {
-        case .day:
-            let dayAgo = calendar.date(byAdding: .day, value: -1, to: now) ?? now
-            return glucoseHistory.filter { $0.timestamp >= dayAgo }
-        case .week:
-            let weekAgo = calendar.date(byAdding: .day, value: -7, to: now) ?? now
-            return glucoseHistory.filter { $0.timestamp >= weekAgo }
-        case .month:
-            let monthAgo = calendar.date(byAdding: .month, value: -1, to: now) ?? now
-            return glucoseHistory.filter { $0.timestamp >= monthAgo }
-        }
-    }
-    
-    private func loadSampleData() {
-        // Load sample glucose data for demonstration
-        let calendar = Calendar.current
-        let now = Date()
-        
-        glucoseHistory = [
-            GlucoseEntry(level: 95, timestamp: now, notes: "Morning reading"),
-            GlucoseEntry(level: 120, timestamp: calendar.date(byAdding: .hour, value: -2, to: now) ?? now, notes: "After lunch"),
-            GlucoseEntry(level: 88, timestamp: calendar.date(byAdding: .hour, value: -4, to: now) ?? now, notes: "Before lunch"),
-            GlucoseEntry(level: 135, timestamp: calendar.date(byAdding: .day, value: -1, to: now) ?? now, notes: "Evening"),
-            GlucoseEntry(level: 92, timestamp: calendar.date(byAdding: .day, value: -1, to: now) ?? now, notes: "Morning"),
-            GlucoseEntry(level: 110, timestamp: calendar.date(byAdding: .day, value: -2, to: now) ?? now, notes: "Afternoon"),
-            GlucoseEntry(level: 85, timestamp: calendar.date(byAdding: .day, value: -2, to: now) ?? now, notes: "Morning"),
-            GlucoseEntry(level: 125, timestamp: calendar.date(byAdding: .day, value: -3, to: now) ?? now, notes: "Evening"),
-            GlucoseEntry(level: 90, timestamp: calendar.date(byAdding: .day, value: -3, to: now) ?? now, notes: "Morning"),
-            GlucoseEntry(level: 115, timestamp: calendar.date(byAdding: .day, value: -4, to: now) ?? now, notes: "Afternoon")
-        ]
-        
-        // Load sample reminders
         reminders = [
             Reminder(title: "Morning Glucose Check", time: calendar.date(bySettingHour: 8, minute: 0, second: 0, of: now) ?? now, type: .glucose),
             Reminder(title: "Take Medication", time: calendar.date(bySettingHour: 12, minute: 0, second: 0, of: now) ?? now, type: .medication),
@@ -1299,58 +1142,7 @@ struct GlucoseHistoryRow: View {
     }
 }
 
-struct GlucoseChartView: View {
-    let entries: [GlucoseEntry]
-    let timeframe: GlucoseView.TimeFrame
-    
-    var body: some View {
-        VStack {
-            if entries.isEmpty {
-                VStack(spacing: 12) {
-                    Image(systemName: "chart.line.uptrend.xyaxis")
-                        .font(.system(size: 40))
-                        .foregroundColor(.secondary)
-                    
-                    Text("No data for selected timeframe")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Color.gray.opacity(0.1))
-                .cornerRadius(12)
-            } else {
-                // Simple chart representation
-                HStack(alignment: .bottom, spacing: 4) {
-                    ForEach(entries.reversed()) { entry in
-                        VStack {
-                            Rectangle()
-                                .fill(getGlucoseColor(entry.level))
-                                .frame(width: 20, height: CGFloat(entry.level) / 2)
-                                .cornerRadius(4)
-                            
-                            Text("\(entry.level)")
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .padding()
-                .background(Color.gray.opacity(0.1))
-                .cornerRadius(12)
-            }
-        }
-    }
-    
-    private func getGlucoseColor(_ level: Int) -> Color {
-        switch level {
-        case 0..<70: return .red
-        case 70..<140: return .green
-        case 140..<200: return .orange
-        default: return .red
-        }
-    }
-}
+
 
 // MARK: - Activity View
 struct ActivityView: View {
@@ -2211,3 +2003,4 @@ struct CameraView: UIViewControllerRepresentable {
 #Preview {
     ContentView()
 }
+
