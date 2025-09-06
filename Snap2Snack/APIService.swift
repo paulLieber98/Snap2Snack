@@ -13,11 +13,12 @@ class APIService: ObservableObject {
         }
         
         // Convert image to base64
-        guard let imageData = image.jpegData(compressionQuality: Config.imageCompressionQuality),
-              let base64Image = imageData.base64EncodedString() else {
+        guard let imageData = image.jpegData(compressionQuality: Config.imageCompressionQuality) else {
             completion(.failure(APIError.imageProcessingFailed))
             return
         }
+        
+        let base64Image = imageData.base64EncodedString()
         
         // Create the request
         let request = createOpenAIRequest(imageBase64: base64Image)
