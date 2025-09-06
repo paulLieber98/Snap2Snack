@@ -1281,14 +1281,14 @@ struct ActivityView: View {
             userBiometrics = UserBiometrics.load()
             loadPersonalizedActivities()
         }
-        .onChange(of: userBiometrics) { _ in
+        .onChange(of: userBiometrics) { oldValue, newValue in
             userBiometrics.save()
             loadPersonalizedActivities()
         }
-        .onChange(of: selectedCategory) { _ in
+        .onChange(of: selectedCategory) { oldValue, newValue in
             filterActivities()
         }
-        .onChange(of: selectedDifficulty) { _ in
+        .onChange(of: selectedDifficulty) { oldValue, newValue in
             filterActivities()
         }
     }
@@ -1364,7 +1364,7 @@ struct ActivityView: View {
                 ],
                 caloriesBurned: 80,
                 heartRateZone: "40-60% max",
-                suitableFor: [.diabetes, .arthritis, .mobilityIssues, .wheelchair],
+                suitableFor: [.diabetes, .arthritis, .mobilityIssues],
                 contraindications: []
             ),
             Activity(
@@ -1711,7 +1711,7 @@ enum ActivityDifficulty: String, CaseIterable {
     }
 }
 
-enum ActivityCategory: String, CaseIterable {
+enum ActivityCategory: String, CaseIterable, Codable {
     case cardio = "Cardio"
     case strength = "Strength"
     case flexibility = "Flexibility"
@@ -1720,7 +1720,7 @@ enum ActivityCategory: String, CaseIterable {
     case diabetesSpecific = "Diabetes Specific"
 }
 
-enum HealthCondition: String, CaseIterable {
+enum HealthCondition: String, CaseIterable, Codable {
     case diabetes = "Diabetes"
     case hypertension = "Hypertension"
     case heartDisease = "Heart Disease"
@@ -1733,7 +1733,7 @@ enum HealthCondition: String, CaseIterable {
     case none = "None"
 }
 
-struct UserBiometrics: Codable {
+struct UserBiometrics: Codable, Equatable {
     var age: Int = 0
     var weight: Double = 0.0 // in kg
     var height: Double = 0.0 // in cm
@@ -1767,7 +1767,7 @@ struct UserBiometrics: Codable {
     }
 }
 
-enum FitnessLevel: String, CaseIterable {
+enum FitnessLevel: String, CaseIterable, Codable {
     case beginner = "Beginner"
     case intermediate = "Intermediate"
     case advanced = "Advanced"
@@ -1781,7 +1781,7 @@ enum FitnessLevel: String, CaseIterable {
     }
 }
 
-enum Disability: String, CaseIterable {
+enum Disability: String, CaseIterable, Codable {
     case wheelchair = "Wheelchair User"
     case limitedMobility = "Limited Mobility"
     case visualImpairment = "Visual Impairment"
