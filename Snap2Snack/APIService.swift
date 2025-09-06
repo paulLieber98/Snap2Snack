@@ -64,16 +64,7 @@ class APIService: ObservableObject {
             messages: [
                 OpenAIMessage(
                     role: "user",
-                    content: [
-                        OpenAIContent(
-                            type: "text",
-                            text: "Analyze this food image for diabetes management. Provide: 1) Food name, 2) Is it diabetes-friendly (true/false), 3) Confidence score (0-1), 4) Recommendation, 5) Nutrition data (calories, carbs, protein, fiber, sugar, glycemic index). Respond in JSON format."
-                        ),
-                        OpenAIContent(
-                            type: "image_url",
-                            imageURL: OpenAIImageURL(url: "data:image/jpeg;base64,\(imageBase64)")
-                        )
-                    ]
+                    content: "Analyze this food image for diabetes management. Provide: 1) Food name, 2) Is it diabetes-friendly (true/false), 3) Confidence score (0-1), 4) Recommendation, 5) Nutrition data (calories, carbs, protein, fiber, sugar, glycemic index). Respond in JSON format. [Image: data:image/jpeg;base64,\(imageBase64)]"
                 )
             ],
             maxTokens: Config.maxTokens,
@@ -128,22 +119,7 @@ struct OpenAIRequest: Codable {
 
 struct OpenAIMessage: Codable {
     let role: String
-    let content: [OpenAIContent]
-}
-
-struct OpenAIContent: Codable {
-    let type: String
-    let text: String?
-    let imageURL: OpenAIImageURL?
-    
-    enum CodingKeys: String, CodingKey {
-        case type, text
-        case imageURL = "image_url"
-    }
-}
-
-struct OpenAIImageURL: Codable {
-    let url: String
+    let content: String
 }
 
 struct OpenAIResponse: Codable {
@@ -152,6 +128,25 @@ struct OpenAIResponse: Codable {
 
 struct OpenAIChoice: Codable {
     let message: OpenAIMessage
+}
+
+// MARK: - Data Models
+struct ScanResult: Identifiable {
+    let id = UUID()
+    let foodName: String
+    let isDiabetesFriendly: Bool
+    let confidence: Double
+    let recommendation: String
+    let nutritionData: NutritionData
+}
+
+struct NutritionData {
+    let calories: Int
+    let carbs: Double
+    let protein: Double
+    let fiber: Double
+    let sugar: Double
+    let glycemicIndex: String
 }
 
 // MARK: - Error Types
