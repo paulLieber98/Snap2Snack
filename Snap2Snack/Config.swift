@@ -2,7 +2,16 @@ import Foundation
 
 struct Config {
     // MARK: - API Configuration
-    static let openAIAPIKey = "***REMOVED***"
+    // Try to get API key from environment variable first, then fallback to placeholder
+    static let openAIAPIKey: String = {
+        // First try to get from environment variable (for development)
+        if let envKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"], !envKey.isEmpty {
+            return envKey
+        }
+        
+        // Fallback to placeholder for public repo
+        return "***REMOVED***"
+    }()
     
     // MARK: - App Configuration
     static let maxScanHistory = 10
