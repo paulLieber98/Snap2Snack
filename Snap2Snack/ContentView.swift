@@ -1147,6 +1147,13 @@ struct GlucoseHistoryRow: View {
 // MARK: - Activity View
 struct ActivityView: View {
     @State private var activities: [Activity] = []
+    @State private var userBiometrics = UserBiometrics()
+    @State private var showingBiometricInput = false
+    @State private var selectedActivity: Activity?
+    @State private var showingActivityDetail = false
+    @State private var filteredActivities: [Activity] = []
+    @State private var selectedCategory: ActivityCategory? = nil
+    @State private var selectedDifficulty: ActivityDifficulty? = nil
     
     var body: some View {
         NavigationView {
@@ -1172,6 +1179,58 @@ struct ActivityView: View {
                     }
                     .frame(maxWidth: .infinity)
                     
+                    // Biometric Status Card
+                    BiometricStatusCard(
+                        biometrics: userBiometrics,
+                        onEdit: { showingBiometricInput = true }
+                    )
+                    .padding(.horizontal)
+                    
+                    // Filter Controls
+                    if !activities.isEmpty {
+                        VStack(spacing: 16) {
+                            // Category Filter
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 12) {
+                                    FilterChip(
+                                        title: "All",
+                                        isSelected: selectedCategory == nil,
+                                        action: { selectedCategory = nil }
+                                    )
+                                    
+                                    ForEach(ActivityCategory.allCases, id: \.self) { category in
+                                        FilterChip(
+                                            title: category.rawValue,
+                                            isSelected: selectedCategory == category,
+                                            action: { selectedCategory = category }
+                                        )
+                                    }
+                                }
+                                .padding(.horizontal)
+                            }
+                            
+                            // Difficulty Filter
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 12) {
+                                    FilterChip(
+                                        title: "All Levels",
+                                        isSelected: selectedDifficulty == nil,
+                                        action: { selectedDifficulty = nil }
+                                    )
+                                    
+                                    ForEach(ActivityDifficulty.allCases, id: \.self) { difficulty in
+                                        FilterChip(
+                                            title: difficulty.rawValue,
+                                            isSelected: selectedDifficulty == difficulty,
+                                            action: { selectedDifficulty = difficulty }
+                                        )
+                                    }
+                                }
+                                .padding(.horizontal)
+                            }
+                        }
+                    }
+                    
                     // Activity List
                     if activities.isEmpty {
                         VStack(spacing: 12) {
@@ -1183,9 +1242,10 @@ struct ActivityView: View {
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                             
-                            Text("Placeholder for activity recommendations")
+                            Text("Complete your biometric profile to get personalized recommendations")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
                         }
                         .padding()
                         .background(Color.gray.opacity(0.1))
@@ -1193,8 +1253,11 @@ struct ActivityView: View {
                         .padding(.horizontal)
                     } else {
                         LazyVStack(spacing: 12) {
-                            ForEach(activities) { activity in
-                                ActivityCard(activity: activity)
+                            ForEach(filteredActivities) { activity in
+                                EnhancedActivityCard(activity: activity) {
+                                    selectedActivity = activity
+                                    showingActivityDetail = true
+                                }
                                     .padding(.horizontal)
                             }
                         }
@@ -1206,38 +1269,244 @@ struct ActivityView: View {
             }
             .navigationBarHidden(true)
         }
+        .sheet(isPresented: $showingBiometricInput) {
+            BiometricInputView(biometrics: $userBiometrics)
+        }
+        .sheet(isPresented: $showingActivityDetail) {
+            if let activity = selectedActivity {
+                ActivityDetailView(activity: activity)
+            }
+        }
         .onAppear {
-            loadSampleActivities()
+            userBiometrics = UserBiometrics.load()
+            loadPersonalizedActivities()
+        }
+        .onChange(of: userBiometrics) { _ in
+            userBiometrics.save()
+            loadPersonalizedActivities()
+        }
+        .onChange(of: selectedCategory) { _ in
+            filterActivities()
+        }
+        .onChange(of: selectedDifficulty) { _ in
+            filterActivities()
         }
     }
     
-    private func loadSampleActivities() {
-        activities = [
+    private func loadPersonalizedActivities() {
+        activities = generatePersonalizedActivities(for: userBiometrics)
+        filterActivities()
+    }
+    
+    private func filterActivities() {
+        filteredActivities = activities.filter { activity in
+            let categoryMatch = selectedCategory == nil || activity.category == selectedCategory
+            let difficultyMatch = selectedDifficulty == nil || activity.difficulty == selectedDifficulty
+            return categoryMatch && difficultyMatch
+        }
+    }
+    
+    private func generatePersonalizedActivities(for biometrics: UserBiometrics) -> [Activity] {
+        var activities: [Activity] = []
+        
+        // Base activities that are safe for everyone
+        let baseActivities = [
             Activity(
-                name: "Walking",
-                description: "Placeholder for walking activity description",
-                duration: "30 min",
+                name: "Gentle Walking",
+                description: "Low-impact walking perfect for beginners and those with mobility concerns. Great for blood sugar management.",
+                duration: "15-30 min",
                 intensity: "Low",
-                benefits: "Placeholder for walking benefits",
-                isSafe: true
+                benefits: "Improves circulation, helps manage blood sugar, reduces stress",
+                isSafe: true,
+                difficulty: .low,
+                durationMinutes: 20,
+                category: .cardio,
+                equipment: ["Comfortable shoes"],
+                instructions: [
+                    "Start with a 5-minute warm-up at slow pace",
+                    "Walk at a comfortable pace for 15-20 minutes",
+                    "Cool down with 5 minutes of slow walking",
+                    "Monitor your blood sugar before and after"
+                ],
+                safetyTips: [
+                    "Check blood sugar before starting",
+                    "Stay hydrated",
+                    "Stop if you feel dizzy or unwell",
+                    "Wear proper footwear"
+                ],
+                caloriesBurned: 100,
+                heartRateZone: "50-70% max",
+                suitableFor: [.diabetes, .hypertension, .obesity, .mobilityIssues],
+                contraindications: []
             ),
             Activity(
-                name: "Yoga",
-                description: "Placeholder for yoga activity description",
-                duration: "45 min",
+                name: "Chair Yoga",
+                description: "Seated yoga poses that improve flexibility and reduce stress without putting strain on joints.",
+                duration: "20-30 min",
                 intensity: "Low",
-                benefits: "Placeholder for yoga benefits",
-                isSafe: true
+                benefits: "Improves flexibility, reduces stress, enhances balance",
+                isSafe: true,
+                difficulty: .low,
+                durationMinutes: 25,
+                category: .flexibility,
+                equipment: ["Sturdy chair"],
+                instructions: [
+                    "Sit comfortably in a chair with feet flat on floor",
+                    "Perform gentle neck rolls and shoulder stretches",
+                    "Do seated spinal twists and forward folds",
+                    "End with deep breathing exercises"
+                ],
+                safetyTips: [
+                    "Move slowly and gently",
+                    "Stop if you feel pain",
+                    "Breathe deeply throughout",
+                    "Use props if needed for support"
+                ],
+                caloriesBurned: 80,
+                heartRateZone: "40-60% max",
+                suitableFor: [.diabetes, .arthritis, .mobilityIssues, .wheelchair],
+                contraindications: []
             ),
             Activity(
-                name: "Swimming",
-                description: "Placeholder for swimming activity description",
-                duration: "20 min",
+                name: "Resistance Band Exercises",
+                description: "Light strength training using resistance bands to build muscle and improve insulin sensitivity.",
+                duration: "15-25 min",
                 intensity: "Medium",
-                benefits: "Placeholder for swimming benefits",
-                isSafe: true
+                benefits: "Builds muscle, improves insulin sensitivity, strengthens bones",
+                isSafe: true,
+                difficulty: .medium,
+                durationMinutes: 20,
+                category: .strength,
+                equipment: ["Resistance bands", "Chair"],
+                instructions: [
+                    "Warm up with 5 minutes of light movement",
+                    "Perform 2-3 sets of 10-15 repetitions for each exercise",
+                    "Focus on major muscle groups: arms, legs, core",
+                    "Cool down with gentle stretching"
+                ],
+                safetyTips: [
+                    "Start with light resistance",
+                    "Maintain proper form",
+                    "Breathe during each repetition",
+                    "Stop if you feel joint pain"
+                ],
+                caloriesBurned: 120,
+                heartRateZone: "60-80% max",
+                suitableFor: [.diabetes, .obesity],
+                contraindications: [.arthritis]
             )
         ]
+        
+        activities.append(contentsOf: baseActivities)
+        
+        // Add more advanced activities based on fitness level
+        if biometrics.fitnessLevel == .intermediate || biometrics.fitnessLevel == .advanced {
+            activities.append(contentsOf: [
+                Activity(
+                    name: "Brisk Walking",
+                    description: "Moderate-intensity walking that significantly improves cardiovascular health and blood sugar control.",
+                    duration: "30-45 min",
+                    intensity: "Medium",
+                    benefits: "Improves heart health, burns calories, enhances mood",
+                    isSafe: true,
+                    difficulty: .medium,
+                    durationMinutes: 35,
+                    category: .cardio,
+                    equipment: ["Comfortable shoes", "Water bottle"],
+                    instructions: [
+                        "Start with 5-minute warm-up walk",
+                        "Increase pace to brisk walking for 25-35 minutes",
+                        "Maintain conversation pace (able to talk but not sing)",
+                        "Cool down with 5 minutes of slow walking"
+                    ],
+                    safetyTips: [
+                        "Monitor heart rate during exercise",
+                        "Stay hydrated throughout",
+                        "Check blood sugar before and after",
+                        "Wear reflective clothing if walking at night"
+                    ],
+                    caloriesBurned: 200,
+                    heartRateZone: "60-80% max",
+                    suitableFor: [.diabetes, .hypertension],
+                    contraindications: [.mobilityIssues]
+                ),
+                Activity(
+                    name: "Swimming",
+                    description: "Full-body workout that's easy on joints while providing excellent cardiovascular benefits.",
+                    duration: "20-40 min",
+                    intensity: "Medium",
+                    benefits: "Full-body workout, joint-friendly, improves lung capacity",
+                    isSafe: true,
+                    difficulty: .medium,
+                    durationMinutes: 30,
+                    category: .cardio,
+                    equipment: ["Swimsuit", "Goggles", "Pool access"],
+                    instructions: [
+                        "Start with 5 minutes of gentle swimming",
+                        "Swim at moderate pace for 20-30 minutes",
+                        "Mix different strokes: freestyle, backstroke, breaststroke",
+                        "End with 5 minutes of cool-down swimming"
+                    ],
+                    safetyTips: [
+                        "Never swim alone",
+                        "Check blood sugar before entering pool",
+                        "Stay hydrated",
+                        "Stop if you feel dizzy or unwell"
+                    ],
+                    caloriesBurned: 250,
+                    heartRateZone: "60-80% max",
+                    suitableFor: [.diabetes, .arthritis, .obesity],
+                    contraindications: [.visionProblems]
+                )
+            ])
+        }
+        
+        // Add diabetes-specific activities
+        activities.append(
+            Activity(
+                name: "Blood Sugar Balance Workout",
+                description: "Specially designed exercises to help regulate blood sugar levels throughout the day.",
+                duration: "15-30 min",
+                intensity: "Low-Medium",
+                benefits: "Regulates blood sugar, improves insulin sensitivity, reduces stress",
+                isSafe: true,
+                difficulty: .low,
+                durationMinutes: 20,
+                category: .diabetesSpecific,
+                equipment: ["Water bottle", "Glucose monitor"],
+                instructions: [
+                    "Check blood sugar before starting",
+                    "Perform 5 minutes of light warm-up",
+                    "Do 10-15 minutes of moderate activity",
+                    "Check blood sugar after completion",
+                    "Have a healthy snack if needed"
+                ],
+                safetyTips: [
+                    "Always check blood sugar before and after",
+                    "Keep glucose tablets nearby",
+                    "Stop if blood sugar drops below 70 mg/dL",
+                    "Stay hydrated throughout"
+                ],
+                caloriesBurned: 150,
+                heartRateZone: "50-70% max",
+                suitableFor: [.diabetes],
+                contraindications: []
+            )
+        )
+        
+        // Filter activities based on health conditions and disabilities
+        return activities.filter { activity in
+            // Check if user has any contraindications for this activity
+            let hasContraindication = !Set(activity.contraindications).isDisjoint(with: Set(biometrics.healthConditions))
+            if hasContraindication { return false }
+            
+            // Check if activity is suitable for user's conditions
+            let hasSuitableCondition = Set(activity.suitableFor).isSuperset(of: Set(biometrics.healthConditions)) ||
+                                     activity.suitableFor.contains(.diabetes) ||
+                                     biometrics.healthConditions.isEmpty
+            
+            return hasSuitableCondition
+        }
     }
 }
 
@@ -1408,6 +1677,117 @@ struct Activity: Identifiable {
     let intensity: String
     let benefits: String
     let isSafe: Bool
+    let difficulty: ActivityDifficulty
+    let durationMinutes: Int
+    let category: ActivityCategory
+    let equipment: [String]
+    let instructions: [String]
+    let safetyTips: [String]
+    let caloriesBurned: Int
+    let heartRateZone: String
+    let suitableFor: [HealthCondition]
+    let contraindications: [HealthCondition]
+}
+
+enum ActivityDifficulty: String, CaseIterable {
+    case low = "Low"
+    case medium = "Medium"
+    case high = "High"
+    
+    var color: Color {
+        switch self {
+        case .low: return .green
+        case .medium: return .orange
+        case .high: return .red
+        }
+    }
+    
+    var icon: String {
+        switch self {
+        case .low: return "leaf.fill"
+        case .medium: return "flame.fill"
+        case .high: return "bolt.fill"
+        }
+    }
+}
+
+enum ActivityCategory: String, CaseIterable {
+    case cardio = "Cardio"
+    case strength = "Strength"
+    case flexibility = "Flexibility"
+    case balance = "Balance"
+    case lowImpact = "Low Impact"
+    case diabetesSpecific = "Diabetes Specific"
+}
+
+enum HealthCondition: String, CaseIterable {
+    case diabetes = "Diabetes"
+    case hypertension = "Hypertension"
+    case heartDisease = "Heart Disease"
+    case arthritis = "Arthritis"
+    case obesity = "Obesity"
+    case mobilityIssues = "Mobility Issues"
+    case visionProblems = "Vision Problems"
+    case neuropathy = "Neuropathy"
+    case kidneyDisease = "Kidney Disease"
+    case none = "None"
+}
+
+struct UserBiometrics: Codable {
+    var age: Int = 0
+    var weight: Double = 0.0 // in kg
+    var height: Double = 0.0 // in cm
+    var fitnessLevel: FitnessLevel = .beginner
+    var healthConditions: [HealthCondition] = []
+    var disabilities: [Disability] = []
+    var activityPreferences: [ActivityCategory] = []
+    var maxHeartRate: Int = 0
+    var bmi: Double = 0.0
+    var isComplete: Bool = false
+    
+    mutating func calculateDerivedValues() {
+        bmi = weight / ((height / 100) * (height / 100))
+        maxHeartRate = 220 - age
+        isComplete = age > 0 && weight > 0 && height > 0
+    }
+    
+    // UserDefaults persistence
+    static func load() -> UserBiometrics {
+        if let data = UserDefaults.standard.data(forKey: "UserBiometrics"),
+           let biometrics = try? JSONDecoder().decode(UserBiometrics.self, from: data) {
+            return biometrics
+        }
+        return UserBiometrics()
+    }
+    
+    func save() {
+        if let data = try? JSONEncoder().encode(self) {
+            UserDefaults.standard.set(data, forKey: "UserBiometrics")
+        }
+    }
+}
+
+enum FitnessLevel: String, CaseIterable {
+    case beginner = "Beginner"
+    case intermediate = "Intermediate"
+    case advanced = "Advanced"
+    
+    var description: String {
+        switch self {
+        case .beginner: return "New to exercise or returning after a long break"
+        case .intermediate: return "Regular exercise 2-3 times per week"
+        case .advanced: return "Regular exercise 4+ times per week"
+        }
+    }
+}
+
+enum Disability: String, CaseIterable {
+    case wheelchair = "Wheelchair User"
+    case limitedMobility = "Limited Mobility"
+    case visualImpairment = "Visual Impairment"
+    case hearingImpairment = "Hearing Impairment"
+    case cognitiveImpairment = "Cognitive Impairment"
+    case none = "None"
 }
 
 struct Resource: Identifiable {
@@ -1725,6 +2105,269 @@ struct ActivityCard: View {
     }
 }
 
+struct EnhancedActivityCard: View {
+    let activity: Activity
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            VStack(alignment: .leading, spacing: 12) {
+                // Header with name and difficulty
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(activity.name)
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.primary)
+                        
+                        Text(activity.category.rawValue)
+                            .font(.caption)
+                            .foregroundColor(.green)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 2)
+                            .background(Color.green.opacity(0.2))
+                            .cornerRadius(6)
+                    }
+                    
+                    Spacer()
+                    
+                    VStack(alignment: .trailing, spacing: 4) {
+                        HStack(spacing: 4) {
+                            Image(systemName: activity.difficulty.icon)
+                                .font(.caption)
+                            Text(activity.difficulty.rawValue)
+                                .font(.caption)
+                                .fontWeight(.medium)
+                        }
+                        .foregroundColor(activity.difficulty.color)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(activity.difficulty.color.opacity(0.2))
+                        .cornerRadius(8)
+                        
+                        Text(activity.duration)
+                            .font(.caption)
+                            .foregroundColor(.blue)
+                    }
+                }
+                
+                // Description
+                Text(activity.description)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .lineLimit(2)
+                
+                // Stats row
+                HStack(spacing: 16) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "flame.fill")
+                            .font(.caption)
+                            .foregroundColor(.orange)
+                        Text("\(activity.caloriesBurned) cal")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    HStack(spacing: 4) {
+                        Image(systemName: "heart.fill")
+                            .font(.caption)
+                            .foregroundColor(.red)
+                        Text(activity.heartRateZone)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    Spacer()
+                    
+                    if activity.isSafe {
+                        HStack(spacing: 4) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.caption)
+                                .foregroundColor(.green)
+                            Text("Safe")
+                                .font(.caption)
+                                .foregroundColor(.green)
+                        }
+                    }
+                }
+                
+                // Equipment needed
+                if !activity.equipment.isEmpty {
+                    HStack {
+                        Image(systemName: "bag.fill")
+                            .font(.caption)
+                            .foregroundColor(.blue)
+                        Text("Equipment: \(activity.equipment.joined(separator: ", "))")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
+                        Spacer()
+                    }
+                }
+            }
+            .padding()
+            .background(Color.gray.opacity(0.1))
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.green.opacity(0.3), lineWidth: 1)
+            )
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+}
+
+struct BiometricStatusCard: View {
+    let biometrics: UserBiometrics
+    let onEdit: () -> Void
+    
+    var body: some View {
+        VStack(spacing: 12) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Your Profile")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                    
+                    if biometrics.isComplete {
+                        Text("Profile Complete")
+                            .font(.caption)
+                            .foregroundColor(.green)
+                    } else {
+                        Text("Complete your profile for personalized recommendations")
+                            .font(.caption)
+                            .foregroundColor(.orange)
+                    }
+                }
+                
+                Spacer()
+                
+                Button("Edit") {
+                    onEdit()
+                }
+                .foregroundColor(.green)
+                .fontWeight(.semibold)
+            }
+            
+            if biometrics.isComplete {
+                HStack(spacing: 20) {
+                    BiometricStat(
+                        title: "Age",
+                        value: "\(biometrics.age)",
+                        unit: "years",
+                        color: .blue
+                    )
+                    
+                    BiometricStat(
+                        title: "BMI",
+                        value: String(format: "%.1f", biometrics.bmi),
+                        unit: "",
+                        color: getBMIColor(biometrics.bmi)
+                    )
+                    
+                    BiometricStat(
+                        title: "Fitness",
+                        value: biometrics.fitnessLevel.rawValue,
+                        unit: "",
+                        color: .green
+                    )
+                }
+                
+                if !biometrics.healthConditions.isEmpty {
+                    HStack {
+                        Text("Health Conditions:")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        
+                        Text(biometrics.healthConditions.map { $0.rawValue }.joined(separator: ", "))
+                            .font(.caption)
+                            .foregroundColor(.primary)
+                            .lineLimit(1)
+                        
+                        Spacer()
+                    }
+                }
+            } else {
+                HStack {
+                    Image(systemName: "person.circle")
+                        .font(.title2)
+                        .foregroundColor(.secondary)
+                    
+                    Text("Add your biometric information to get personalized activity recommendations")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.leading)
+                    
+                    Spacer()
+                }
+            }
+        }
+        .padding()
+        .background(Color.gray.opacity(0.1))
+        .cornerRadius(12)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(biometrics.isComplete ? Color.green.opacity(0.3) : Color.orange.opacity(0.3), lineWidth: 1)
+        )
+    }
+    
+    private func getBMIColor(_ bmi: Double) -> Color {
+        switch bmi {
+        case 0..<18.5: return .blue
+        case 18.5..<25: return .green
+        case 25..<30: return .orange
+        default: return .red
+        }
+    }
+}
+
+struct BiometricStat: View {
+    let title: String
+    let value: String
+    let unit: String
+    let color: Color
+    
+    var body: some View {
+        VStack(spacing: 4) {
+            Text(value)
+                .font(.headline)
+                .fontWeight(.bold)
+                .foregroundColor(color)
+            
+            Text(unit)
+                .font(.caption)
+                .foregroundColor(.secondary)
+            
+            Text(title)
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+    }
+}
+
+struct FilterChip: View {
+    let title: String
+    let isSelected: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .font(.caption)
+                .fontWeight(.medium)
+                .foregroundColor(isSelected ? .white : .green)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(isSelected ? Color.green : Color.green.opacity(0.2))
+                )
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+}
+
 struct ResourceCard: View {
     let resource: Resource
     
@@ -1867,36 +2510,414 @@ struct ActivityDetailView: View {
     
     var body: some View {
         NavigationView {
-            VStack(spacing: 20) {
+            ScrollView {
+                VStack(spacing: 24) {
+                    // Header
+                    VStack(spacing: 12) {
+                        Image(systemName: "figure.walk.circle.fill")
+                            .font(.system(size: 60))
+                            .foregroundColor(.green)
+                        
                 Text(activity.name)
-                    .font(.largeTitle)
+                            .font(.title)
                     .fontWeight(.bold)
+                            .multilineTextAlignment(.center)
                 
                 Text(activity.description)
                     .font(.body)
+                            .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
-                
+                    }
+                    
+                    // Quick Info Cards
+                    HStack(spacing: 16) {
+                        InfoCard(
+                            title: "Duration",
+                            value: activity.duration,
+                            icon: "clock.fill",
+                            color: .blue
+                        )
+                        
+                        InfoCard(
+                            title: "Difficulty",
+                            value: activity.difficulty.rawValue,
+                            icon: activity.difficulty.icon,
+                            color: activity.difficulty.color
+                        )
+                        
+                        InfoCard(
+                            title: "Calories",
+                            value: "\(activity.caloriesBurned)",
+                            icon: "flame.fill",
+                            color: .orange
+                        )
+                    }
+                    
+                    // Category and Heart Rate
+                    HStack(spacing: 16) {
+                        InfoCard(
+                            title: "Category",
+                            value: activity.category.rawValue,
+                            icon: "tag.fill",
+                            color: .green
+                        )
+                        
+                        InfoCard(
+                            title: "Heart Rate",
+                            value: activity.heartRateZone,
+                            icon: "heart.fill",
+                            color: .red
+                        )
+                    }
+                    
+                    // Equipment Needed
+                    if !activity.equipment.isEmpty {
+                        VStack(spacing: 12) {
+                            Text("Equipment Needed")
+                                .font(.headline)
+                                .foregroundColor(.primary)
+                            
+                            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 8) {
+                                ForEach(activity.equipment, id: \.self) { item in
+                                    HStack {
+                                        Image(systemName: "checkmark.circle.fill")
+                                            .foregroundColor(.green)
+                                        Text(item)
+                                            .font(.subheadline)
+                                        Spacer()
+                                    }
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 8)
+                                    .background(Color.green.opacity(0.1))
+                                    .cornerRadius(8)
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Instructions
                 VStack(spacing: 16) {
-                    InfoRow(icon: "clock", title: "Duration", value: activity.duration)
-                    InfoRow(icon: "flame", title: "Intensity", value: activity.intensity)
-                }
-                
+                        Text("Instructions")
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                        
+                        VStack(spacing: 12) {
+                            ForEach(Array(activity.instructions.enumerated()), id: \.offset) { index, instruction in
+                                HStack(alignment: .top, spacing: 12) {
+                                    Text("\(index + 1)")
+                                        .font(.headline)
+                                        .fontWeight(.bold)
+                                        .foregroundColor(.white)
+                                        .frame(width: 30, height: 30)
+                                        .background(Color.green)
+                                        .cornerRadius(15)
+                                    
+                                    Text(instruction)
+                                        .font(.body)
+                                        .multilineTextAlignment(.leading)
+                                    
+                                    Spacer()
+                                }
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                                .background(Color.gray.opacity(0.1))
+                                .cornerRadius(8)
+                            }
+                        }
+                    }
+                    
+                    // Safety Tips
+                    VStack(spacing: 16) {
+                        Text("Safety Tips")
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                        
+                        VStack(spacing: 8) {
+                            ForEach(activity.safetyTips, id: \.self) { tip in
+                                HStack(alignment: .top, spacing: 8) {
+                                    Image(systemName: "exclamationmark.triangle.fill")
+                                        .foregroundColor(.orange)
+                                        .font(.caption)
+                                    
+                                    Text(tip)
+                                        .font(.subheadline)
+                                        .multilineTextAlignment(.leading)
+                                    
+                                    Spacer()
+                                }
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                                .background(Color.orange.opacity(0.1))
+                                .cornerRadius(8)
+                            }
+                        }
+                    }
+                    
+                    // Benefits
+                    VStack(spacing: 12) {
+                        Text("Benefits")
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                        
+                        Text(activity.benefits)
+                            .font(.body)
+                            .multilineTextAlignment(.center)
+                            .padding()
+                            .background(Color.green.opacity(0.1))
+                            .cornerRadius(12)
+                    }
+                    
+                    // Action Button
                 Button("Start Activity") {
                     // Here you would start the activity tracking
                     presentationMode.wrappedValue.dismiss()
                 }
                 .foregroundColor(.white)
-                .padding()
+                    .padding(.horizontal, 32)
+                    .padding(.vertical, 16)
                 .background(Color.green)
                 .cornerRadius(12)
+                    .font(.headline)
                 
-                Spacer()
+                    Spacer(minLength: 50)
             }
             .padding()
+            }
+            .navigationTitle("Activity Details")
+            .navigationBarTitleDisplayMode(.inline)
             .navigationBarItems(trailing: Button("Done") {
                 presentationMode.wrappedValue.dismiss()
             })
+        }
+    }
+}
+
+struct BiometricInputView: View {
+    @Binding var biometrics: UserBiometrics
+    @Environment(\.presentationMode) var presentationMode
+    @State private var tempBiometrics: UserBiometrics
+    
+    init(biometrics: Binding<UserBiometrics>) {
+        self._biometrics = biometrics
+        self._tempBiometrics = State(initialValue: biometrics.wrappedValue)
+    }
+    
+    var body: some View {
+        NavigationView {
+            ScrollView {
+                VStack(spacing: 24) {
+                    // Header
+                    VStack(spacing: 12) {
+                        Image(systemName: "person.circle.fill")
+                            .font(.system(size: 60))
+                            .foregroundColor(.green)
+                        
+                        Text("Your Health Profile")
+                            .font(.title)
+                            .fontWeight(.bold)
+                        
+                        Text("Help us personalize your activity recommendations")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
+                    
+                    // Basic Information
+                    VStack(spacing: 16) {
+                        Text("Basic Information")
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                        
+                        VStack(spacing: 12) {
+                            HStack {
+                                Text("Age")
+                                    .frame(width: 80, alignment: .leading)
+                                TextField("Enter your age", value: $tempBiometrics.age, format: .number)
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    .keyboardType(.numberPad)
+                            }
+                            
+                            HStack {
+                                Text("Weight (kg)")
+                                    .frame(width: 80, alignment: .leading)
+                                TextField("Enter your weight", value: $tempBiometrics.weight, format: .number)
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    .keyboardType(.decimalPad)
+                            }
+                            
+                            HStack {
+                                Text("Height (cm)")
+                                    .frame(width: 80, alignment: .leading)
+                                TextField("Enter your height", value: $tempBiometrics.height, format: .number)
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    .keyboardType(.numberPad)
+                            }
+                        }
+                    }
+                    .padding()
+                    .background(Color.gray.opacity(0.1))
+                    .cornerRadius(12)
+                    
+                    // Fitness Level
+                    VStack(spacing: 16) {
+                        Text("Fitness Level")
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                        
+                        VStack(spacing: 8) {
+                            ForEach(FitnessLevel.allCases, id: \.self) { level in
+                                Button(action: {
+                                    tempBiometrics.fitnessLevel = level
+                                }) {
+                                    HStack {
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text(level.rawValue)
+                                                .font(.subheadline)
+                                                .fontWeight(.medium)
+                                                .foregroundColor(.primary)
+                                            
+                                            Text(level.description)
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                                .multilineTextAlignment(.leading)
+                                        }
+                                        
+                                        Spacer()
+                                        
+                                        if tempBiometrics.fitnessLevel == level {
+                                            Image(systemName: "checkmark.circle.fill")
+                                                .foregroundColor(.green)
+                                        } else {
+                                            Image(systemName: "circle")
+                                                .foregroundColor(.gray)
+                                        }
+                                    }
+                                    .padding()
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .fill(tempBiometrics.fitnessLevel == level ? Color.green.opacity(0.1) : Color.gray.opacity(0.1))
+                                    )
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                            }
+                        }
+                    }
+                    
+                    // Health Conditions
+                    VStack(spacing: 16) {
+                        Text("Health Conditions")
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                        
+                        Text("Select any conditions that apply to you")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        
+                        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 8) {
+                            ForEach(HealthCondition.allCases, id: \.self) { condition in
+                                if condition != .none {
+                                    Button(action: {
+                                        if tempBiometrics.healthConditions.contains(condition) {
+                                            tempBiometrics.healthConditions.removeAll { $0 == condition }
+                                        } else {
+                                            tempBiometrics.healthConditions.append(condition)
+                                        }
+                                    }) {
+                                        HStack {
+                                            Text(condition.rawValue)
+                                                .font(.caption)
+                                                .foregroundColor(.primary)
+                                            
+                                            Spacer()
+                                            
+                                            if tempBiometrics.healthConditions.contains(condition) {
+                                                Image(systemName: "checkmark.circle.fill")
+                                                    .foregroundColor(.green)
+                                            } else {
+                                                Image(systemName: "circle")
+                                                    .foregroundColor(.gray)
+                                            }
+                                        }
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 8)
+                                        .background(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .fill(tempBiometrics.healthConditions.contains(condition) ? Color.green.opacity(0.2) : Color.gray.opacity(0.1))
+                                        )
+                                    }
+                                    .buttonStyle(PlainButtonStyle())
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Disabilities
+                    VStack(spacing: 16) {
+                        Text("Disabilities or Limitations")
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                        
+                        Text("Select any limitations that apply to you")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        
+                        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 8) {
+                            ForEach(Disability.allCases, id: \.self) { disability in
+                                if disability != .none {
+                                    Button(action: {
+                                        if tempBiometrics.disabilities.contains(disability) {
+                                            tempBiometrics.disabilities.removeAll { $0 == disability }
+                                        } else {
+                                            tempBiometrics.disabilities.append(disability)
+                                        }
+                                    }) {
+                                        HStack {
+                                            Text(disability.rawValue)
+                                                .font(.caption)
+                                                .foregroundColor(.primary)
+                                            
+                                            Spacer()
+                                            
+                                            if tempBiometrics.disabilities.contains(disability) {
+                                                Image(systemName: "checkmark.circle.fill")
+                                                    .foregroundColor(.green)
+                                            } else {
+                                                Image(systemName: "circle")
+                                                    .foregroundColor(.gray)
+                                            }
+                                        }
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 8)
+                                        .background(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .fill(tempBiometrics.disabilities.contains(disability) ? Color.green.opacity(0.2) : Color.gray.opacity(0.1))
+                                        )
+                                    }
+                                    .buttonStyle(PlainButtonStyle())
+                                }
+                            }
+                        }
+                    }
+                    
+                    Spacer(minLength: 50)
+                }
+                .padding()
+            }
+            .navigationTitle("Health Profile")
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarItems(
+                leading: Button("Cancel") {
+                    presentationMode.wrappedValue.dismiss()
+                },
+                trailing: Button("Save") {
+                    tempBiometrics.calculateDerivedValues()
+                    biometrics = tempBiometrics
+                    biometrics.save()
+                    presentationMode.wrappedValue.dismiss()
+                }
+                .disabled(!tempBiometrics.isComplete)
+            )
         }
     }
 }
