@@ -1,6 +1,6 @@
 # Snap2Snack - ChatGPT Integration Setup
 
-## 🚀 Quick Setup Guide
+## �� Quick Setup Guide
 
 ### 1. Get Your OpenAI API Key
 1. Go to [OpenAI Platform](https://platform.openai.com/)
@@ -9,12 +9,26 @@
 4. Click "Create new secret key"
 5. Copy the generated API key
 
-### 2. Configure the App
+### 2. Configure the App (Choose One Method)
+
+#### Method A: Environment Variable (Recommended for Development)
+1. Open your project in Xcode
+2. Go to **Product → Scheme → Edit Scheme**
+3. Select **Run** in the left sidebar
+4. Go to **Arguments** tab
+5. Under **Environment Variables**, click the **+** button
+6. Add:
+   - **Name**: `OPENAI_API_KEY`
+   - **Value**: `your-actual-api-key-here`
+7. Click **Close**
+
+#### Method B: Direct Code Configuration
 1. Open `Snap2Snack/Config.swift`
 2. Replace `YOUR_OPENAI_API_KEY_HERE` with your actual API key:
    ```swift
-   static let openAIAPIKey = "YOUR_OPENAI_API_KEY_HERE"
+   static let openAIAPIKey = "sk-your-actual-api-key-here"
    ```
+   **Note**: This method is NOT recommended for public repositories
 
 ### 3. Build and Run
 1. Clean and build the project
@@ -48,6 +62,7 @@
 - No data is stored permanently
 - API calls are made securely over HTTPS
 - Your API key is stored locally in the app
+- **Environment variables keep your key secure and out of the code**
 
 ## 💡 Tips for Best Results
 
@@ -59,9 +74,10 @@
 ## 🛠 Troubleshooting
 
 ### "API Key Required" Error
-- Make sure you've added your API key to `Config.swift`
+- Make sure you've set the environment variable correctly
 - Verify the key is correct and active
 - Check your OpenAI account has sufficient credits
+- Try restarting Xcode after setting the environment variable
 
 ### "Analysis Error" Messages
 - Check your internet connection
@@ -97,3 +113,12 @@ The app uses OpenAI's GPT-4o mini model which is:
 ## 🎉 Ready to Go!
 
 Once configured, your Snap2Snack app will provide real AI-powered diabetes management assistance!
+
+## 🔐 Security Note
+
+The app is configured to use environment variables for API keys, making it safe to:
+- Commit to public repositories
+- Share with other developers
+- Publish as open source
+
+Your API key will only be used when running the app locally with the environment variable set.
