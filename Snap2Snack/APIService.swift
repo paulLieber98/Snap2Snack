@@ -130,25 +130,6 @@ struct OpenAIChoice: Codable {
     let message: OpenAIMessage
 }
 
-// MARK: - Data Models
-struct ScanResult: Identifiable {
-    let id = UUID()
-    let foodName: String
-    let isDiabetesFriendly: Bool
-    let confidence: Double
-    let recommendation: String
-    let nutritionData: NutritionData
-}
-
-struct NutritionData {
-    let calories: Int
-    let carbs: Double
-    let protein: Double
-    let fiber: Double
-    let sugar: Double
-    let glycemicIndex: String
-}
-
 // MARK: - Error Types
 enum APIError: Error, LocalizedError {
     case missingAPIKey
