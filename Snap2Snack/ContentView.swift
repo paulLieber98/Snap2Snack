@@ -1820,9 +1820,9 @@ enum PhysicalLimitation: String, CaseIterable, Codable {
 struct UserBiometrics: Codable, Equatable {
     // Page 1: Physical Health Data
     var age: Int = 0
-    var weight: Double = 0.0 // in kg
-    var height: Double = 0.0 // in cm
-    var waistCircumference: Double = 0.0 // in cm
+    var weight: Double = 0.0 // in lbs
+    var height: Double = 0.0 // in inches
+    var waistCircumference: Double = 0.0 // in inches
     var restingHeartRate: Int = 0
     var bloodPressureSystolic: Int = 0
     var bloodPressureDiastolic: Int = 0
@@ -1834,7 +1834,7 @@ struct UserBiometrics: Codable, Equatable {
     
     // Additional Physical Health Details
     var bodyFatPercentage: Double = 0.0 // in percentage
-    var muscleMass: Double = 0.0 // in kg
+    var muscleMass: Double = 0.0 // in lbs
     var hydrationLevel: HydrationLevel = .good
     var flexibilityLevel: FlexibilityLevel = .average
     var balanceLevel: BalanceLevel = .good
@@ -1862,7 +1862,7 @@ struct UserBiometrics: Codable, Equatable {
     var isComplete: Bool = false
     
     mutating func calculateDerivedValues() {
-        bmi = weight / ((height / 100) * (height / 100))
+        bmi = (weight / (height * height)) * 703 // BMI formula for imperial units
         maxHeartRate = 220 - age
         waistToHeightRatio = waistCircumference / height
         isPage1Complete = age > 0 && weight > 0 && height > 0 && restingHeartRate > 0
@@ -2979,25 +2979,25 @@ struct PhysicalHealthPage: View {
                         }
                         
                         HStack {
-                            Text("Weight (kg)")
+                            Text("Weight (lbs)")
                                 .frame(width: 100, alignment: .leading)
-                            TextField("Enter your weight", value: $tempBiometrics.weight, format: .number)
+                            TextField("Enter weight in pounds", value: $tempBiometrics.weight, format: .number)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .keyboardType(.decimalPad)
                         }
                         
                         HStack {
-                            Text("Height (cm)")
+                            Text("Height (inches)")
                                 .frame(width: 100, alignment: .leading)
-                            TextField("Enter your height", value: $tempBiometrics.height, format: .number)
+                            TextField("Enter height in inches", value: $tempBiometrics.height, format: .number)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .keyboardType(.numberPad)
                         }
                         
                         HStack {
-                            Text("Waist (cm)")
+                            Text("Waist (inches)")
                                 .frame(width: 100, alignment: .leading)
-                            TextField("Waist circumference", value: $tempBiometrics.waistCircumference, format: .number)
+                            TextField("Enter waist in inches", value: $tempBiometrics.waistCircumference, format: .number)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .keyboardType(.decimalPad)
                         }
@@ -3112,7 +3112,7 @@ struct PhysicalHealthPage: View {
                         HStack {
                             Text("Muscle Mass")
                                 .frame(width: 100, alignment: .leading)
-                            TextField("Muscle mass in kg", value: $tempBiometrics.muscleMass, format: .number)
+                            TextField("Muscle mass in lbs", value: $tempBiometrics.muscleMass, format: .number)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .keyboardType(.decimalPad)
                         }
@@ -4653,4 +4653,3 @@ func generatePersonalizedPlan(for biometrics: UserBiometrics) -> PersonalizedExe
 #Preview {
     ContentView()
 }
-
