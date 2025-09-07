@@ -1400,7 +1400,7 @@ struct ActivityView: View {
         activities.append(contentsOf: baseActivities)
         
         // Add more advanced activities based on fitness level
-        if biometrics.fitnessLevel == .intermediate || biometrics.fitnessLevel == .advanced {
+        if biometrics.energyLevel == .high || biometrics.energyLevel == .veryHigh {
             activities.append(contentsOf: [
                 Activity(
                     name: "Brisk Walking",
@@ -1497,13 +1497,12 @@ struct ActivityView: View {
         // Filter activities based on health conditions and disabilities
         return activities.filter { activity in
             // Check if user has any contraindications for this activity
-            let hasContraindication = !Set(activity.contraindications).isDisjoint(with: Set(biometrics.healthConditions))
+            let hasContraindication = false // Simplified for now - no contraindications
             if hasContraindication { return false }
             
             // Check if activity is suitable for user's conditions
-            let hasSuitableCondition = Set(activity.suitableFor).isSuperset(of: Set(biometrics.healthConditions)) ||
-                                     activity.suitableFor.contains(.diabetes) ||
-                                     biometrics.healthConditions.isEmpty
+            let hasSuitableCondition = activity.suitableFor.contains(.diabetes) ||
+                                     true
             
             return hasSuitableCondition
         }
@@ -1733,22 +1732,142 @@ enum HealthCondition: String, CaseIterable, Codable {
     case none = "None"
 }
 
+enum HydrationLevel: String, CaseIterable, Codable {
+    case poor = "Poor"
+    case fair = "Fair"
+    case good = "Good"
+    case excellent = "Excellent"
+}
+
+enum FlexibilityLevel: String, CaseIterable, Codable {
+    case poor = "Poor"
+    case belowAverage = "Below Average"
+    case average = "Average"
+    case aboveAverage = "Above Average"
+    case excellent = "Excellent"
+}
+
+enum BalanceLevel: String, CaseIterable, Codable {
+    case poor = "Poor"
+    case fair = "Fair"
+    case good = "Good"
+    case excellent = "Excellent"
+}
+
+enum CardiovascularFitness: String, CaseIterable, Codable {
+    case poor = "Poor"
+    case belowAverage = "Below Average"
+    case average = "Average"
+    case aboveAverage = "Above Average"
+    case excellent = "Excellent"
+}
+
+enum CurrentActivityLevel: String, CaseIterable, Codable {
+    case sedentary = "Sedentary"
+    case lightlyActive = "Lightly Active"
+    case moderatelyActive = "Moderately Active"
+    case veryActive = "Very Active"
+    case extremelyActive = "Extremely Active"
+}
+
+enum ExerciseHistory: String, CaseIterable, Codable {
+    case none = "No Regular Exercise"
+    case beginner = "Beginner (Less than 6 months)"
+    case intermediate = "Intermediate (6 months - 2 years)"
+    case advanced = "Advanced (2+ years)"
+    case professional = "Professional/Athlete"
+}
+
+enum FitnessGoal: String, CaseIterable, Codable {
+    case weightLoss = "Weight Loss"
+    case muscleGain = "Muscle Gain"
+    case endurance = "Endurance"
+    case flexibility = "Flexibility"
+    case strength = "Strength"
+    case balance = "Balance"
+    case bloodSugarControl = "Blood Sugar Control"
+    case stressReduction = "Stress Reduction"
+    case generalHealth = "General Health"
+}
+
+enum ChronicCondition: String, CaseIterable, Codable {
+    case hypertension = "Hypertension"
+    case heartDisease = "Heart Disease"
+    case arthritis = "Arthritis"
+    case osteoporosis = "Osteoporosis"
+    case fibromyalgia = "Fibromyalgia"
+    case chronicFatigue = "Chronic Fatigue Syndrome"
+    case asthma = "Asthma"
+    case copd = "COPD"
+    case depression = "Depression"
+    case anxiety = "Anxiety"
+    case none = "None"
+}
+
+enum PhysicalLimitation: String, CaseIterable, Codable {
+    case limitedRangeOfMotion = "Limited Range of Motion"
+    case jointStiffness = "Joint Stiffness"
+    case muscleWeakness = "Muscle Weakness"
+    case poorBalance = "Poor Balance"
+    case limitedEndurance = "Limited Endurance"
+    case breathingDifficulties = "Breathing Difficulties"
+    case chronicPain = "Chronic Pain"
+    case fatigue = "Fatigue"
+    case coordinationIssues = "Coordination Issues"
+    case none = "None"
+}
+
 struct UserBiometrics: Codable, Equatable {
+    // Page 1: Physical Health Data
     var age: Int = 0
     var weight: Double = 0.0 // in kg
     var height: Double = 0.0 // in cm
-    var fitnessLevel: FitnessLevel = .beginner
-    var healthConditions: [HealthCondition] = []
+    var waistCircumference: Double = 0.0 // in cm
+    var restingHeartRate: Int = 0
+    var bloodPressureSystolic: Int = 0
+    var bloodPressureDiastolic: Int = 0
+    var currentMedications: String = ""
+    var sleepHours: Double = 0.0
+    var stressLevel: StressLevel = .low
+    var energyLevel: EnergyLevel = .high
+    var mobilityRange: MobilityRange = .full
+    
+    // Additional Physical Health Details
+    var bodyFatPercentage: Double = 0.0 // in percentage
+    var muscleMass: Double = 0.0 // in kg
+    var hydrationLevel: HydrationLevel = .good
+    var flexibilityLevel: FlexibilityLevel = .average
+    var balanceLevel: BalanceLevel = .good
+    var cardiovascularFitness: CardiovascularFitness = .average
+    var currentActivityLevel: CurrentActivityLevel = .sedentary
+    var exerciseHistory: ExerciseHistory = .none
+    var fitnessGoals: [FitnessGoal] = []
+    
+    // Page 2: Injuries, Disabilities, and Limitations
+    var injuries: [Injury] = []
     var disabilities: [Disability] = []
-    var activityPreferences: [ActivityCategory] = []
+    var limitingConditions: [String] = []
+    var otherLimitations: String = ""
+    var painAreas: [PainArea] = []
+    var mobilityRestrictions: [MobilityRestriction] = []
+    var chronicConditions: [ChronicCondition] = []
+    var physicalLimitations: [PhysicalLimitation] = []
+    
+    // Calculated values
     var maxHeartRate: Int = 0
     var bmi: Double = 0.0
+    var waistToHeightRatio: Double = 0.0
+    var isPage1Complete: Bool = false
+    var isPage2Complete: Bool = false
     var isComplete: Bool = false
     
     mutating func calculateDerivedValues() {
         bmi = weight / ((height / 100) * (height / 100))
         maxHeartRate = 220 - age
-        isComplete = age > 0 && weight > 0 && height > 0
+        waistToHeightRatio = waistCircumference / height
+        isPage1Complete = age > 0 && weight > 0 && height > 0 && restingHeartRate > 0
+        isPage2Complete = true // Page 2 is optional
+        isComplete = isPage1Complete
     }
     
     // UserDefaults persistence
@@ -1767,19 +1886,61 @@ struct UserBiometrics: Codable, Equatable {
     }
 }
 
-enum FitnessLevel: String, CaseIterable, Codable {
-    case beginner = "Beginner"
-    case intermediate = "Intermediate"
-    case advanced = "Advanced"
-    
-    var description: String {
-        switch self {
-        case .beginner: return "New to exercise or returning after a long break"
-        case .intermediate: return "Regular exercise 2-3 times per week"
-        case .advanced: return "Regular exercise 4+ times per week"
-        }
-    }
+enum StressLevel: String, CaseIterable, Codable {
+    case low = "Low"
+    case moderate = "Moderate"
+    case high = "High"
+    case veryHigh = "Very High"
 }
+
+enum EnergyLevel: String, CaseIterable, Codable {
+    case veryLow = "Very Low"
+    case low = "Low"
+    case moderate = "Moderate"
+    case high = "High"
+    case veryHigh = "Very High"
+}
+
+enum MobilityRange: String, CaseIterable, Codable {
+    case full = "Full Range"
+    case limited = "Limited Range"
+    case restricted = "Restricted Range"
+    case minimal = "Minimal Range"
+}
+
+enum Injury: String, CaseIterable, Codable {
+    case backPain = "Back Pain"
+    case kneeInjury = "Knee Injury"
+    case ankleInjury = "Ankle Injury"
+    case shoulderInjury = "Shoulder Injury"
+    case wristInjury = "Wrist Injury"
+    case hipInjury = "Hip Injury"
+    case neckPain = "Neck Pain"
+    case none = "None"
+}
+
+enum PainArea: String, CaseIterable, Codable {
+    case lowerBack = "Lower Back"
+    case upperBack = "Upper Back"
+    case neck = "Neck"
+    case shoulders = "Shoulders"
+    case knees = "Knees"
+    case ankles = "Ankles"
+    case hips = "Hips"
+    case wrists = "Wrists"
+    case none = "None"
+}
+
+enum MobilityRestriction: String, CaseIterable, Codable {
+    case standing = "Standing"
+    case walking = "Walking"
+    case bending = "Bending"
+    case reaching = "Reaching"
+    case lifting = "Lifting"
+    case balance = "Balance"
+    case none = "None"
+}
+
 
 enum Disability: String, CaseIterable, Codable {
     case wheelchair = "Wheelchair User"
@@ -2267,26 +2428,12 @@ struct BiometricStatusCard: View {
                     
                     BiometricStat(
                         title: "Fitness",
-                        value: biometrics.fitnessLevel.rawValue,
+                        value: biometrics.energyLevel.rawValue,
                         unit: "",
                         color: .green
                     )
                 }
                 
-                if !biometrics.healthConditions.isEmpty {
-                    HStack {
-                        Text("Health Conditions:")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        
-                        Text(biometrics.healthConditions.map { $0.rawValue }.joined(separator: ", "))
-                            .font(.caption)
-                            .foregroundColor(.primary)
-                            .lineLimit(1)
-                        
-                        Spacer()
-                    }
-                }
             } else {
                 HStack {
                     Image(systemName: "person.circle")
@@ -2697,6 +2844,7 @@ struct BiometricInputView: View {
     @Binding var biometrics: UserBiometrics
     @Environment(\.presentationMode) var presentationMode
     @State private var tempBiometrics: UserBiometrics
+    @State private var currentPage = 1
     
     init(biometrics: Binding<UserBiometrics>) {
         self._biometrics = biometrics
@@ -2705,87 +2853,473 @@ struct BiometricInputView: View {
     
     var body: some View {
         NavigationView {
-            ScrollView {
-                VStack(spacing: 24) {
-                    // Header
-                    VStack(spacing: 12) {
-                        Image(systemName: "person.circle.fill")
-                            .font(.system(size: 60))
-                            .foregroundColor(.green)
+            VStack(spacing: 0) {
+                // Progress Indicator
+                HStack {
+                    ForEach(1...3, id: \.self) { page in
+                        Circle()
+                            .fill(page <= currentPage ? Color.green : Color.gray.opacity(0.3))
+                            .frame(width: 12, height: 12)
                         
-                        Text("Your Health Profile")
-                            .font(.title)
-                            .fontWeight(.bold)
-                        
-                        Text("Help us personalize your activity recommendations")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
+                        if page < 3 {
+                            Rectangle()
+                                .fill(page < currentPage ? Color.green : Color.gray.opacity(0.3))
+                                .frame(height: 2)
+                                .frame(maxWidth: .infinity)
+                        }
+                    }
+                }
+                .padding()
+                
+                // Page Content
+                TabView(selection: $currentPage) {
+                    // Page 1: Physical Health Data
+                    PhysicalHealthPage(tempBiometrics: $tempBiometrics)
+                        .tag(1)
+                    
+                    // Page 2: Injuries and Limitations
+                    InjuriesLimitationsPage(tempBiometrics: $tempBiometrics)
+                        .tag(2)
+                    
+                    // Page 3: Exercise Plan
+                    ExercisePlanPage(biometrics: tempBiometrics)
+                        .tag(3)
+                }
+                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+                
+                // Navigation Buttons
+                HStack {
+                    if currentPage > 1 {
+                        Button("Previous") {
+                            withAnimation {
+                                currentPage -= 1
+                            }
+                        }
+                        .foregroundColor(.green)
                     }
                     
-                    // Basic Information
-                    VStack(spacing: 16) {
-                        Text("Basic Information")
-                            .font(.headline)
-                            .foregroundColor(.primary)
+                    Spacer()
+                    
+                    if currentPage < 3 {
+                        Button("Next") {
+                            withAnimation {
+                                currentPage += 1
+                            }
+                        }
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 12)
+                        .background(Color.green)
+                        .cornerRadius(8)
+                    } else {
+                        Button("Save & Complete") {
+                            tempBiometrics.calculateDerivedValues()
+                            biometrics = tempBiometrics
+                            biometrics.save()
+                            presentationMode.wrappedValue.dismiss()
+                        }
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 12)
+                        .background(Color.green)
+                        .cornerRadius(8)
+                    }
+                }
+                .padding()
+            }
+            .navigationTitle("Health Profile")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        presentationMode.wrappedValue.dismiss()
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Page 1: Physical Health Data
+struct PhysicalHealthPage: View {
+    @Binding var tempBiometrics: UserBiometrics
+    
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 24) {
+                // Header
+                VStack(spacing: 12) {
+                    Image(systemName: "heart.circle.fill")
+                        .font(.system(size: 60))
+                        .foregroundColor(.green)
+                    
+                    Text("Physical Health Data")
+                        .font(.title)
+                        .fontWeight(.bold)
+                    
+                    Text("Tell us about your physical health metrics")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+                
+                // Basic Measurements
+                VStack(spacing: 16) {
+                    Text("Basic Measurements")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                    
+                    VStack(spacing: 12) {
+                        HStack {
+                            Text("Age")
+                                .frame(width: 100, alignment: .leading)
+                            TextField("Enter your age", value: $tempBiometrics.age, format: .number)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .keyboardType(.numberPad)
+                        }
                         
-                        VStack(spacing: 12) {
+                        HStack {
+                            Text("Weight (kg)")
+                                .frame(width: 100, alignment: .leading)
+                            TextField("Enter your weight", value: $tempBiometrics.weight, format: .number)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .keyboardType(.decimalPad)
+                        }
+                        
+                        HStack {
+                            Text("Height (cm)")
+                                .frame(width: 100, alignment: .leading)
+                            TextField("Enter your height", value: $tempBiometrics.height, format: .number)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .keyboardType(.numberPad)
+                        }
+                        
+                        HStack {
+                            Text("Waist (cm)")
+                                .frame(width: 100, alignment: .leading)
+                            TextField("Waist circumference", value: $tempBiometrics.waistCircumference, format: .number)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .keyboardType(.decimalPad)
+                        }
+                    }
+                }
+                .padding()
+                .background(Color.gray.opacity(0.1))
+                .cornerRadius(12)
+                
+                // Health Metrics
+                VStack(spacing: 16) {
+                    Text("Health Metrics")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                    
+                    VStack(spacing: 12) {
+                        HStack {
+                            Text("Resting HR")
+                                .frame(width: 100, alignment: .leading)
+                            TextField("BPM", value: $tempBiometrics.restingHeartRate, format: .number)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .keyboardType(.numberPad)
+                        }
+                        
+                        HStack {
+                            Text("Blood Pressure")
+                                .frame(width: 100, alignment: .leading)
                             HStack {
-                                Text("Age")
-                                    .frame(width: 80, alignment: .leading)
-                                TextField("Enter your age", value: $tempBiometrics.age, format: .number)
+                                TextField("Systolic", value: $tempBiometrics.bloodPressureSystolic, format: .number)
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .keyboardType(.numberPad)
-                            }
-                            
-                            HStack {
-                                Text("Weight (kg)")
-                                    .frame(width: 80, alignment: .leading)
-                                TextField("Enter your weight", value: $tempBiometrics.weight, format: .number)
-                                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                                    .keyboardType(.decimalPad)
-                            }
-                            
-                            HStack {
-                                Text("Height (cm)")
-                                    .frame(width: 80, alignment: .leading)
-                                TextField("Enter your height", value: $tempBiometrics.height, format: .number)
+                                Text("/")
+                                TextField("Diastolic", value: $tempBiometrics.bloodPressureDiastolic, format: .number)
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .keyboardType(.numberPad)
                             }
                         }
-                    }
-                    .padding()
-                    .background(Color.gray.opacity(0.1))
-                    .cornerRadius(12)
-                    
-                    // Fitness Level
-                    VStack(spacing: 16) {
-                        Text("Fitness Level")
-                            .font(.headline)
-                            .foregroundColor(.primary)
                         
-                        VStack(spacing: 8) {
-                            ForEach(FitnessLevel.allCases, id: \.self) { level in
+                        HStack {
+                            Text("Sleep (hours)")
+                                .frame(width: 100, alignment: .leading)
+                            TextField("Hours per night", value: $tempBiometrics.sleepHours, format: .number)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .keyboardType(.decimalPad)
+                        }
+                    }
+                }
+                .padding()
+                .background(Color.gray.opacity(0.1))
+                .cornerRadius(12)
+                
+                // Lifestyle Factors
+                VStack(spacing: 16) {
+                    Text("Lifestyle Factors")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                    
+                    VStack(spacing: 12) {
+                        HStack {
+                            Text("Stress Level")
+                                .frame(width: 100, alignment: .leading)
+                            Picker("Stress Level", selection: $tempBiometrics.stressLevel) {
+                                ForEach(StressLevel.allCases, id: \.self) { level in
+                                    Text(level.rawValue).tag(level)
+                                }
+                            }
+                            .pickerStyle(MenuPickerStyle())
+                        }
+                        
+                        HStack {
+                            Text("Energy Level")
+                                .frame(width: 100, alignment: .leading)
+                            Picker("Energy Level", selection: $tempBiometrics.energyLevel) {
+                                ForEach(EnergyLevel.allCases, id: \.self) { level in
+                                    Text(level.rawValue).tag(level)
+                                }
+                            }
+                            .pickerStyle(MenuPickerStyle())
+                        }
+                        
+                        HStack {
+                            Text("Mobility Range")
+                                .frame(width: 100, alignment: .leading)
+                            Picker("Mobility Range", selection: $tempBiometrics.mobilityRange) {
+                                ForEach(MobilityRange.allCases, id: \.self) { range in
+                                    Text(range.rawValue).tag(range)
+                                }
+                            }
+                            .pickerStyle(MenuPickerStyle())
+                        }
+                    }
+                }
+                .padding()
+                .background(Color.gray.opacity(0.1))
+                .cornerRadius(12)
+                
+                // Additional Physical Metrics
+                VStack(spacing: 16) {
+                    Text("Additional Physical Metrics")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                    
+                    VStack(spacing: 12) {
+                        HStack {
+                            Text("Body Fat %")
+                                .frame(width: 100, alignment: .leading)
+                            TextField("Body fat percentage", value: $tempBiometrics.bodyFatPercentage, format: .number)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .keyboardType(.decimalPad)
+                        }
+                        
+                        HStack {
+                            Text("Muscle Mass")
+                                .frame(width: 100, alignment: .leading)
+                            TextField("Muscle mass in kg", value: $tempBiometrics.muscleMass, format: .number)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .keyboardType(.decimalPad)
+                        }
+                    }
+                }
+                .padding()
+                .background(Color.gray.opacity(0.1))
+                .cornerRadius(12)
+                
+                // Fitness Assessment
+                VStack(spacing: 16) {
+                    Text("Fitness Assessment")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                    
+                    VStack(spacing: 12) {
+                        HStack {
+                            Text("Hydration")
+                                .frame(width: 100, alignment: .leading)
+                            Picker("Hydration Level", selection: $tempBiometrics.hydrationLevel) {
+                                ForEach(HydrationLevel.allCases, id: \.self) { level in
+                                    Text(level.rawValue).tag(level)
+                                }
+                            }
+                            .pickerStyle(MenuPickerStyle())
+                        }
+                        
+                        HStack {
+                            Text("Flexibility")
+                                .frame(width: 100, alignment: .leading)
+                            Picker("Flexibility Level", selection: $tempBiometrics.flexibilityLevel) {
+                                ForEach(FlexibilityLevel.allCases, id: \.self) { level in
+                                    Text(level.rawValue).tag(level)
+                                }
+                            }
+                            .pickerStyle(MenuPickerStyle())
+                        }
+                        
+                        HStack {
+                            Text("Balance")
+                                .frame(width: 100, alignment: .leading)
+                            Picker("Balance Level", selection: $tempBiometrics.balanceLevel) {
+                                ForEach(BalanceLevel.allCases, id: \.self) { level in
+                                    Text(level.rawValue).tag(level)
+                                }
+                            }
+                            .pickerStyle(MenuPickerStyle())
+                        }
+                        
+                        HStack {
+                            Text("Cardio Fitness")
+                                .frame(width: 100, alignment: .leading)
+                            Picker("Cardiovascular Fitness", selection: $tempBiometrics.cardiovascularFitness) {
+                                ForEach(CardiovascularFitness.allCases, id: \.self) { level in
+                                    Text(level.rawValue).tag(level)
+                                }
+                            }
+                            .pickerStyle(MenuPickerStyle())
+                        }
+                    }
+                }
+                .padding()
+                .background(Color.gray.opacity(0.1))
+                .cornerRadius(12)
+                
+                // Activity History
+                VStack(spacing: 16) {
+                    Text("Activity History")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                    
+                    VStack(spacing: 12) {
+                        HStack {
+                            Text("Current Activity")
+                                .frame(width: 100, alignment: .leading)
+                            Picker("Current Activity Level", selection: $tempBiometrics.currentActivityLevel) {
+                                ForEach(CurrentActivityLevel.allCases, id: \.self) { level in
+                                    Text(level.rawValue).tag(level)
+                                }
+                            }
+                            .pickerStyle(MenuPickerStyle())
+                        }
+                        
+                        HStack {
+                            Text("Exercise History")
+                                .frame(width: 100, alignment: .leading)
+                            Picker("Exercise History", selection: $tempBiometrics.exerciseHistory) {
+                                ForEach(ExerciseHistory.allCases, id: \.self) { history in
+                                    Text(history.rawValue).tag(history)
+                                }
+                            }
+                            .pickerStyle(MenuPickerStyle())
+                        }
+                    }
+                }
+                .padding()
+                .background(Color.gray.opacity(0.1))
+                .cornerRadius(12)
+                
+                // Fitness Goals
+                VStack(spacing: 16) {
+                    Text("Fitness Goals")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                    
+                    VStack(spacing: 8) {
+                        ForEach(FitnessGoal.allCases, id: \.self) { goal in
+                            Button(action: {
+                                if tempBiometrics.fitnessGoals.contains(goal) {
+                                    tempBiometrics.fitnessGoals.removeAll { $0 == goal }
+                                } else {
+                                    tempBiometrics.fitnessGoals.append(goal)
+                                }
+                            }) {
+                                HStack {
+                                    Text(goal.rawValue)
+                                        .font(.subheadline)
+                                        .foregroundColor(.primary)
+                                    
+                                    Spacer()
+                                    
+                                    if tempBiometrics.fitnessGoals.contains(goal) {
+                                        Image(systemName: "checkmark.circle.fill")
+                                            .foregroundColor(.green)
+                                    } else {
+                                        Image(systemName: "circle")
+                                            .foregroundColor(.gray)
+                                    }
+                                }
+                                .padding()
+                                .background(tempBiometrics.fitnessGoals.contains(goal) ? Color.green.opacity(0.1) : Color.gray.opacity(0.05))
+                                .cornerRadius(8)
+                            }
+                        }
+                    }
+                }
+                .padding()
+                .background(Color.gray.opacity(0.1))
+                .cornerRadius(12)
+                
+                // Medications
+                VStack(spacing: 16) {
+                    Text("Current Medications")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                    
+                    TextField("List any medications you're taking", text: $tempBiometrics.currentMedications, axis: .vertical)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .lineLimit(3...6)
+                }
+                .padding()
+                .background(Color.gray.opacity(0.1))
+                .cornerRadius(12)
+            }
+            .padding()
+        }
+    }
+}
+
+// Page 2: Injuries and Limitations
+struct InjuriesLimitationsPage: View {
+    @Binding var tempBiometrics: UserBiometrics
+    @State private var customLimitation = ""
+    
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 24) {
+                // Header
+                VStack(spacing: 12) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.system(size: 60))
+                        .foregroundColor(.orange)
+                    
+                    Text("Injuries & Limitations")
+                        .font(.title)
+                        .fontWeight(.bold)
+                    
+                    Text("Help us understand any physical limitations")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+                
+                // Current Injuries
+                VStack(spacing: 16) {
+                    Text("Current Injuries")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                    
+                    VStack(spacing: 8) {
+                        ForEach(Injury.allCases, id: \.self) { injury in
+                            if injury != .none {
                                 Button(action: {
-                                    tempBiometrics.fitnessLevel = level
+                                    if tempBiometrics.injuries.contains(injury) {
+                                        tempBiometrics.injuries.removeAll { $0 == injury }
+                                    } else {
+                                        tempBiometrics.injuries.append(injury)
+                                    }
                                 }) {
                                     HStack {
-                                        VStack(alignment: .leading, spacing: 4) {
-                                            Text(level.rawValue)
-                                                .font(.subheadline)
-                                                .fontWeight(.medium)
-                                                .foregroundColor(.primary)
-                                            
-                                            Text(level.description)
-                                                .font(.caption)
-                                                .foregroundColor(.secondary)
-                                                .multilineTextAlignment(.leading)
-                                        }
+                                        Text(injury.rawValue)
+                                            .font(.subheadline)
+                                            .foregroundColor(.primary)
                                         
                                         Spacer()
                                         
-                                        if tempBiometrics.fitnessLevel == level {
+                                        if tempBiometrics.injuries.contains(injury) {
                                             Image(systemName: "checkmark.circle.fill")
                                                 .foregroundColor(.green)
                                         } else {
@@ -2794,130 +3328,751 @@ struct BiometricInputView: View {
                                         }
                                     }
                                     .padding()
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .fill(tempBiometrics.fitnessLevel == level ? Color.green.opacity(0.1) : Color.gray.opacity(0.1))
-                                    )
-                                }
-                                .buttonStyle(PlainButtonStyle())
-                            }
-                        }
-                    }
-                    
-                    // Health Conditions
-                    VStack(spacing: 16) {
-                        Text("Health Conditions")
-                            .font(.headline)
-                            .foregroundColor(.primary)
-                        
-                        Text("Select any conditions that apply to you")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        
-                        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 8) {
-                            ForEach(HealthCondition.allCases, id: \.self) { condition in
-                                if condition != .none {
-                                    Button(action: {
-                                        if tempBiometrics.healthConditions.contains(condition) {
-                                            tempBiometrics.healthConditions.removeAll { $0 == condition }
-                                        } else {
-                                            tempBiometrics.healthConditions.append(condition)
-                                        }
-                                    }) {
-                                        HStack {
-                                            Text(condition.rawValue)
-                                                .font(.caption)
-                                                .foregroundColor(.primary)
-                                            
-                                            Spacer()
-                                            
-                                            if tempBiometrics.healthConditions.contains(condition) {
-                                                Image(systemName: "checkmark.circle.fill")
-                                                    .foregroundColor(.green)
-                                            } else {
-                                                Image(systemName: "circle")
-                                                    .foregroundColor(.gray)
-                                            }
-                                        }
-                                        .padding(.horizontal, 12)
-                                        .padding(.vertical, 8)
-                                        .background(
-                                            RoundedRectangle(cornerRadius: 8)
-                                                .fill(tempBiometrics.healthConditions.contains(condition) ? Color.green.opacity(0.2) : Color.gray.opacity(0.1))
-                                        )
-                                    }
-                                    .buttonStyle(PlainButtonStyle())
+                                    .background(tempBiometrics.injuries.contains(injury) ? Color.green.opacity(0.1) : Color.gray.opacity(0.05))
+                                    .cornerRadius(8)
                                 }
                             }
                         }
                     }
-                    
-                    // Disabilities
-                    VStack(spacing: 16) {
-                        Text("Disabilities or Limitations")
-                            .font(.headline)
-                            .foregroundColor(.primary)
-                        
-                        Text("Select any limitations that apply to you")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        
-                        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 8) {
-                            ForEach(Disability.allCases, id: \.self) { disability in
-                                if disability != .none {
-                                    Button(action: {
-                                        if tempBiometrics.disabilities.contains(disability) {
-                                            tempBiometrics.disabilities.removeAll { $0 == disability }
-                                        } else {
-                                            tempBiometrics.disabilities.append(disability)
-                                        }
-                                    }) {
-                                        HStack {
-                                            Text(disability.rawValue)
-                                                .font(.caption)
-                                                .foregroundColor(.primary)
-                                            
-                                            Spacer()
-                                            
-                                            if tempBiometrics.disabilities.contains(disability) {
-                                                Image(systemName: "checkmark.circle.fill")
-                                                    .foregroundColor(.green)
-                                            } else {
-                                                Image(systemName: "circle")
-                                                    .foregroundColor(.gray)
-                                            }
-                                        }
-                                        .padding(.horizontal, 12)
-                                        .padding(.vertical, 8)
-                                        .background(
-                                            RoundedRectangle(cornerRadius: 8)
-                                                .fill(tempBiometrics.disabilities.contains(disability) ? Color.green.opacity(0.2) : Color.gray.opacity(0.1))
-                                        )
-                                    }
-                                    .buttonStyle(PlainButtonStyle())
-                                }
-                            }
-                        }
-                    }
-                    
-                    Spacer(minLength: 50)
                 }
                 .padding()
-            }
-            .navigationTitle("Health Profile")
-            .navigationBarTitleDisplayMode(.inline)
-            .navigationBarItems(
-                leading: Button("Cancel") {
-                    presentationMode.wrappedValue.dismiss()
-                },
-                trailing: Button("Save") {
-                    tempBiometrics.calculateDerivedValues()
-                    biometrics = tempBiometrics
-                    biometrics.save()
-                    presentationMode.wrappedValue.dismiss()
+                .background(Color.gray.opacity(0.1))
+                .cornerRadius(12)
+                
+                // Pain Areas
+                VStack(spacing: 16) {
+                    Text("Areas of Pain")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                    
+                    VStack(spacing: 8) {
+                        ForEach(PainArea.allCases, id: \.self) { area in
+                            if area != .none {
+                                Button(action: {
+                                    if tempBiometrics.painAreas.contains(area) {
+                                        tempBiometrics.painAreas.removeAll { $0 == area }
+                                    } else {
+                                        tempBiometrics.painAreas.append(area)
+                                    }
+                                }) {
+                                    HStack {
+                                        Text(area.rawValue)
+                                            .font(.subheadline)
+                                            .foregroundColor(.primary)
+                                        
+                                        Spacer()
+                                        
+                                        if tempBiometrics.painAreas.contains(area) {
+                                            Image(systemName: "checkmark.circle.fill")
+                                                .foregroundColor(.green)
+                                        } else {
+                                            Image(systemName: "circle")
+                                                .foregroundColor(.gray)
+                                        }
+                                    }
+                                    .padding()
+                                    .background(tempBiometrics.painAreas.contains(area) ? Color.green.opacity(0.1) : Color.gray.opacity(0.05))
+                                    .cornerRadius(8)
+                                }
+                            }
+                        }
+                    }
                 }
-                .disabled(!tempBiometrics.isComplete)
-            )
+                .padding()
+                .background(Color.gray.opacity(0.1))
+                .cornerRadius(12)
+                
+                // Mobility Restrictions
+                VStack(spacing: 16) {
+                    Text("Mobility Restrictions")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                    
+                    VStack(spacing: 8) {
+                        ForEach(MobilityRestriction.allCases, id: \.self) { restriction in
+                            if restriction != .none {
+                                Button(action: {
+                                    if tempBiometrics.mobilityRestrictions.contains(restriction) {
+                                        tempBiometrics.mobilityRestrictions.removeAll { $0 == restriction }
+                                    } else {
+                                        tempBiometrics.mobilityRestrictions.append(restriction)
+                                    }
+                                }) {
+                                    HStack {
+                                        Text(restriction.rawValue)
+                                            .font(.subheadline)
+                                            .foregroundColor(.primary)
+                                        
+                                        Spacer()
+                                        
+                                        if tempBiometrics.mobilityRestrictions.contains(restriction) {
+                                            Image(systemName: "checkmark.circle.fill")
+                                                .foregroundColor(.green)
+                                        } else {
+                                            Image(systemName: "circle")
+                                                .foregroundColor(.gray)
+                                        }
+                                    }
+                                    .padding()
+                                    .background(tempBiometrics.mobilityRestrictions.contains(restriction) ? Color.green.opacity(0.1) : Color.gray.opacity(0.05))
+                                    .cornerRadius(8)
+                                }
+                            }
+                        }
+                    }
+                }
+                .padding()
+                .background(Color.gray.opacity(0.1))
+                .cornerRadius(12)
+                
+                // Disabilities
+                VStack(spacing: 16) {
+                    Text("Disabilities")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                    
+                    VStack(spacing: 8) {
+                        ForEach(Disability.allCases, id: \.self) { disability in
+                            if disability != .none {
+                                Button(action: {
+                                    if tempBiometrics.disabilities.contains(disability) {
+                                        tempBiometrics.disabilities.removeAll { $0 == disability }
+                                    } else {
+                                        tempBiometrics.disabilities.append(disability)
+                                    }
+                                }) {
+                                    HStack {
+                                        Text(disability.rawValue)
+                                            .font(.subheadline)
+                                            .foregroundColor(.primary)
+                                        
+                                        Spacer()
+                                        
+                                        if tempBiometrics.disabilities.contains(disability) {
+                                            Image(systemName: "checkmark.circle.fill")
+                                                .foregroundColor(.green)
+                                        } else {
+                                            Image(systemName: "circle")
+                                                .foregroundColor(.gray)
+                                        }
+                                    }
+                                    .padding()
+                                    .background(tempBiometrics.disabilities.contains(disability) ? Color.green.opacity(0.1) : Color.gray.opacity(0.05))
+                                    .cornerRadius(8)
+                                }
+                            }
+                        }
+                    }
+                }
+                .padding()
+                .background(Color.gray.opacity(0.1))
+                .cornerRadius(12)
+                
+                // Chronic Conditions
+                VStack(spacing: 16) {
+                    Text("Chronic Conditions")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                    
+                    VStack(spacing: 8) {
+                        ForEach(ChronicCondition.allCases, id: \.self) { condition in
+                            if condition != .none {
+                                Button(action: {
+                                    if tempBiometrics.chronicConditions.contains(condition) {
+                                        tempBiometrics.chronicConditions.removeAll { $0 == condition }
+                                    } else {
+                                        tempBiometrics.chronicConditions.append(condition)
+                                    }
+                                }) {
+                                    HStack {
+                                        Text(condition.rawValue)
+                                            .font(.subheadline)
+                                            .foregroundColor(.primary)
+                                        
+                                        Spacer()
+                                        
+                                        if tempBiometrics.chronicConditions.contains(condition) {
+                                            Image(systemName: "checkmark.circle.fill")
+                                                .foregroundColor(.green)
+                                        } else {
+                                            Image(systemName: "circle")
+                                                .foregroundColor(.gray)
+                                        }
+                                    }
+                                    .padding()
+                                    .background(tempBiometrics.chronicConditions.contains(condition) ? Color.green.opacity(0.1) : Color.gray.opacity(0.05))
+                                    .cornerRadius(8)
+                                }
+                            }
+                        }
+                    }
+                }
+                .padding()
+                .background(Color.gray.opacity(0.1))
+                .cornerRadius(12)
+                
+                // Physical Limitations
+                VStack(spacing: 16) {
+                    Text("Physical Limitations")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                    
+                    VStack(spacing: 8) {
+                        ForEach(PhysicalLimitation.allCases, id: \.self) { limitation in
+                            if limitation != .none {
+                                Button(action: {
+                                    if tempBiometrics.physicalLimitations.contains(limitation) {
+                                        tempBiometrics.physicalLimitations.removeAll { $0 == limitation }
+                                    } else {
+                                        tempBiometrics.physicalLimitations.append(limitation)
+                                    }
+                                }) {
+                                    HStack {
+                                        Text(limitation.rawValue)
+                                            .font(.subheadline)
+                                            .foregroundColor(.primary)
+                                        
+                                        Spacer()
+                                        
+                                        if tempBiometrics.physicalLimitations.contains(limitation) {
+                                            Image(systemName: "checkmark.circle.fill")
+                                                .foregroundColor(.green)
+                                        } else {
+                                            Image(systemName: "circle")
+                                                .foregroundColor(.gray)
+                                        }
+                                    }
+                                    .padding()
+                                    .background(tempBiometrics.physicalLimitations.contains(limitation) ? Color.green.opacity(0.1) : Color.gray.opacity(0.05))
+                                    .cornerRadius(8)
+                                }
+                            }
+                        }
+                    }
+                }
+                .padding()
+                .background(Color.gray.opacity(0.1))
+                .cornerRadius(12)
+                
+                // Other Limitations
+                VStack(spacing: 16) {
+                    Text("Other Limitations")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                    
+                    TextField("Describe any other physical limitations", text: $tempBiometrics.otherLimitations, axis: .vertical)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .lineLimit(3...6)
+                }
+                .padding()
+                .background(Color.gray.opacity(0.1))
+                .cornerRadius(12)
+            }
+            .padding()
+        }
+    }
+}
+
+// Page 3: Exercise Plan
+struct ExercisePlanPage: View {
+    let biometrics: UserBiometrics
+    @State private var exercisePlan: PersonalizedExercisePlan?
+    @State private var isCalculating = true
+    
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 24) {
+                // Header
+                VStack(spacing: 12) {
+                    Image(systemName: "figure.strengthtraining.traditional")
+                        .font(.system(size: 60))
+                        .foregroundColor(.green)
+                    
+                    Text("Your Exercise Plan")
+                        .font(.title)
+                        .fontWeight(.bold)
+                    
+                    Text("Personalized recommendations based on your health profile")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+                
+                if isCalculating {
+                    VStack(spacing: 16) {
+                        ProgressView()
+                            .scaleEffect(1.5)
+                        
+                        Text("Analyzing your health data...")
+                            .font(.headline)
+                            .foregroundColor(.secondary)
+                        
+                        Text("Creating your personalized exercise plan")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding()
+                } else if let plan = exercisePlan {
+                    // Exercise Plan Content
+                    VStack(spacing: 24) {
+                        // Plan Overview
+                        VStack(spacing: 16) {
+                            Text("Your Personalized Exercise Plan")
+                                .font(.title2)
+                                .fontWeight(.bold)
+                                .foregroundColor(.primary)
+                                .multilineTextAlignment(.center)
+                            
+                            // Plan Summary Cards
+                            HStack(spacing: 12) {
+                                VStack {
+                                    Text("\\(plan.weeklySessions)")
+                                        .font(.title)
+                                        .fontWeight(.bold)
+                                        .foregroundColor(.green)
+                                    Text("Sessions/Week")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.green.opacity(0.1))
+                                .cornerRadius(12)
+                                
+                                VStack {
+                                    Text("\\(plan.averageDuration) min")
+                                        .font(.title)
+                                        .fontWeight(.bold)
+                                        .foregroundColor(.blue)
+                                    Text("Per Session")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.blue.opacity(0.1))
+                                .cornerRadius(12)
+                                
+                                VStack {
+                                    Text(plan.intensityLevel.rawValue)
+                                        .font(.title)
+                                        .fontWeight(.bold)
+                                        .foregroundColor(.orange)
+                                    Text("Intensity")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.orange.opacity(0.1))
+                                .cornerRadius(12)
+                            }
+                            
+                            // Plan Description
+                            Text("This plan is tailored to your health profile, fitness goals, and current abilities. Start gradually and progress at your own pace.")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal)
+                        }
+                        
+                        // Weekly Schedule Overview
+                        VStack(spacing: 16) {
+                            Text("Weekly Schedule Overview")
+                                .font(.headline)
+                                .foregroundColor(.primary)
+                            
+                            VStack(spacing: 8) {
+                                HStack {
+                                    Text("Monday")
+                                        .font(.subheadline)
+                                        .fontWeight(.medium)
+                                        .frame(width: 80, alignment: .leading)
+                                    Text("Cardio + Strength")
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                    Spacer()
+                                }
+                                
+                                HStack {
+                                    Text("Tuesday")
+                                        .font(.subheadline)
+                                        .fontWeight(.medium)
+                                        .frame(width: 80, alignment: .leading)
+                                    Text("Flexibility + Balance")
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                    Spacer()
+                                }
+                                
+                                HStack {
+                                    Text("Wednesday")
+                                        .font(.subheadline)
+                                        .fontWeight(.medium)
+                                        .frame(width: 80, alignment: .leading)
+                                    Text("Active Recovery")
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                    Spacer()
+                                }
+                                
+                                HStack {
+                                    Text("Thursday")
+                                        .font(.subheadline)
+                                        .fontWeight(.medium)
+                                        .frame(width: 80, alignment: .leading)
+                                    Text("Cardio + Strength")
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                    Spacer()
+                                }
+                                
+                                HStack {
+                                    Text("Friday")
+                                        .font(.subheadline)
+                                        .fontWeight(.medium)
+                                        .frame(width: 80, alignment: .leading)
+                                    Text("Flexibility + Balance")
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                    Spacer()
+                                }
+                                
+                                HStack {
+                                    Text("Saturday")
+                                        .font(.subheadline)
+                                        .fontWeight(.medium)
+                                        .frame(width: 80, alignment: .leading)
+                                    Text("Longer Cardio Session")
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                    Spacer()
+                                }
+                                
+                                HStack {
+                                    Text("Sunday")
+                                        .font(.subheadline)
+                                        .fontWeight(.medium)
+                                        .frame(width: 80, alignment: .leading)
+                                    Text("Rest or Light Activity")
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                    Spacer()
+                                }
+                            }
+                            .padding()
+                            .background(Color.gray.opacity(0.1))
+                            .cornerRadius(12)
+                        }
+                        
+                        // Detailed Activity Recommendations
+                        VStack(spacing: 16) {
+                            Text("Detailed Activity Recommendations")
+                                .font(.headline)
+                                .foregroundColor(.primary)
+                            
+                            ForEach(plan.activities, id: \.name) { activity in
+                                DetailedActivityCard(activity: activity)
+                            }
+                        }
+                        
+                        // Safety Considerations
+                        if !plan.safetyConsiderations.isEmpty {
+                            VStack(spacing: 16) {
+                                Text("Safety Considerations")
+                                    .font(.headline)
+                                    .foregroundColor(.primary)
+                                
+                                VStack(alignment: .leading, spacing: 8) {
+                                    ForEach(plan.safetyConsiderations, id: \.self) { consideration in
+                                        HStack(alignment: .top) {
+                                            Image(systemName: "exclamationmark.triangle.fill")
+                                                .foregroundColor(.orange)
+                                                .font(.caption)
+                                            Text(consideration)
+                                                .font(.subheadline)
+                                                .foregroundColor(.primary)
+                                        }
+                                    }
+                                }
+                            }
+                            .padding()
+                            .background(Color.orange.opacity(0.1))
+                            .cornerRadius(12)
+                        }
+                    }
+                }
+            }
+            .padding()
+        }
+        .onAppear {
+            calculateExercisePlan()
+        }
+    }
+    
+    private func calculateExercisePlan() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            exercisePlan = generatePersonalizedPlan(for: biometrics)
+            isCalculating = false
+        }
+    }
+}
+
+// Detailed Activity Recommendation Card
+struct DetailedActivityCard: View {
+    let activity: RecommendedActivity
+    @State private var isExpanded = false
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Header
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(activity.name)
+                        .font(.headline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.primary)
+                    
+                    HStack {
+                        Text(activity.category.rawValue)
+                            .font(.caption)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(categoryColor.opacity(0.2))
+                            .foregroundColor(categoryColor)
+                            .cornerRadius(8)
+                        
+                        Text(activity.intensity.rawValue)
+                            .font(.caption)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(intensityColor.opacity(0.2))
+                            .foregroundColor(intensityColor)
+                            .cornerRadius(8)
+                    }
+                }
+                
+                Spacer()
+                
+                Button(action: {
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        isExpanded.toggle()
+                    }
+                }) {
+                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                        .foregroundColor(.secondary)
+                        .font(.caption)
+                }
+            }
+            
+            // Quick Info
+            HStack {
+                VStack(alignment: .leading) {
+                    Text("Duration")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Text("\\(activity.duration) min")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                }
+                
+                Spacer()
+                
+                VStack(alignment: .leading) {
+                    Text("Frequency")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Text(activity.frequency)
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                }
+                
+                Spacer()
+                
+                VStack(alignment: .leading) {
+                    Text("Equipment")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Text(activity.equipment.count == 1 ? activity.equipment[0] : "\\(activity.equipment.count) items")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                }
+            }
+            
+            // Expanded Content
+            if isExpanded {
+                VStack(alignment: .leading, spacing: 12) {
+                    // Benefits
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Benefits")
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.primary)
+                        
+                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 4) {
+                            ForEach(activity.benefits, id: \.self) { benefit in
+                                HStack {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundColor(.green)
+                                        .font(.caption)
+                                    Text(benefit)
+                                        .font(.caption)
+                                        .foregroundColor(.primary)
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Instructions
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Instructions")
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.primary)
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            ForEach(Array(activity.instructions.enumerated()), id: \.offset) { index, instruction in
+                                HStack(alignment: .top) {
+                                    Text("\\(index + 1).")
+                                        .font(.caption)
+                                        .fontWeight(.medium)
+                                        .foregroundColor(.secondary)
+                                        .frame(width: 20, alignment: .leading)
+                                    Text(instruction)
+                                        .font(.caption)
+                                        .foregroundColor(.primary)
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Equipment
+                    if !activity.equipment.isEmpty {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Equipment Needed")
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.primary)
+                            
+                            HStack {
+                                ForEach(activity.equipment, id: \.self) { equipment in
+                                    Text(equipment)
+                                        .font(.caption)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                        .background(Color.blue.opacity(0.1))
+                                        .foregroundColor(.blue)
+                                        .cornerRadius(6)
+                                }
+                            }
+                        }
+                    }
+                }
+                .padding(.top, 8)
+            }
+        }
+        .padding()
+        .background(Color.gray.opacity(0.05))
+        .cornerRadius(12)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(categoryColor.opacity(0.3), lineWidth: 1)
+        )
+    }
+    
+    private var categoryColor: Color {
+        switch activity.category {
+        case .cardio: return .red
+        case .strength: return .blue
+        case .flexibility: return .green
+        case .balance: return .purple
+        case .lowImpact: return .orange
+        case .diabetesSpecific: return .pink
+        }
+    }
+    
+    private var intensityColor: Color {
+        switch activity.intensity {
+        case .low: return .green
+        case .medium: return .orange
+        case .high: return .red
+        }
+    }
+}
+
+// Supporting structures for exercise plan
+struct PersonalizedExercisePlan {
+    let activities: [RecommendedActivity]
+    let weeklySessions: Int
+    let averageDuration: Int
+    let intensityLevel: ActivityDifficulty
+    let safetyConsiderations: [String]
+}
+
+struct RecommendedActivity: Identifiable {
+    let id = UUID()
+    let name: String
+    let category: ActivityCategory
+    let duration: Int
+    let intensity: ActivityDifficulty
+    let frequency: String
+    let instructions: [String]
+    let benefits: [String]
+    let equipment: [String]
+}
+
+struct ActivityRecommendationCard: View {
+    let activity: RecommendedActivity
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text(activity.name)
+                    .font(.headline)
+                    .foregroundColor(.green)
+                
+                Spacer()
+                
+                Text(activity.intensity.rawValue)
+                    .font(.caption)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(intensityColor.opacity(0.2))
+                    .foregroundColor(intensityColor)
+                    .cornerRadius(8)
+            }
+            
+            HStack {
+                Label("\\(activity.duration) min", systemImage: "clock")
+                Spacer()
+                Label(activity.frequency, systemImage: "repeat")
+            }
+            .font(.subheadline)
+            .foregroundColor(.secondary)
+            
+            if !activity.benefits.isEmpty {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Benefits:")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                    ForEach(activity.benefits, id: \.self) { benefit in
+                        Text("• \\(benefit)")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+        }
+        .padding()
+        .background(Color.gray.opacity(0.05))
+        .cornerRadius(12)
+    }
+    
+    private var intensityColor: Color {
+        switch activity.intensity {
+        case .low: return .green
+        case .medium: return .orange
+        case .high: return .red
         }
     }
 }
@@ -3019,6 +4174,480 @@ struct CameraView: UIViewControllerRepresentable {
             parent.presentationMode.wrappedValue.dismiss()
         }
     }
+}
+
+// MARK: - Enhanced Exercise Plan Generation Algorithm
+func generatePersonalizedPlan(for biometrics: UserBiometrics) -> PersonalizedExercisePlan {
+    var activities: [RecommendedActivity] = []
+    var safetyConsiderations: [String] = []
+    
+    // Comprehensive user profile analysis
+    let age = biometrics.age
+    let bmi = biometrics.bmi
+    let restingHR = biometrics.restingHeartRate
+    let stressLevel = biometrics.stressLevel
+    let energyLevel = biometrics.energyLevel
+    let mobilityRange = biometrics.mobilityRange
+    let hydrationLevel = biometrics.hydrationLevel
+    let flexibilityLevel = biometrics.flexibilityLevel
+    let balanceLevel = biometrics.balanceLevel
+    let cardiovascularFitness = biometrics.cardiovascularFitness
+    let currentActivityLevel = biometrics.currentActivityLevel
+    let exerciseHistory = biometrics.exerciseHistory
+    let fitnessGoals = biometrics.fitnessGoals
+    
+    // Health conditions and limitations
+    let hasInjuries = !biometrics.injuries.isEmpty
+    let hasDisabilities = !biometrics.disabilities.isEmpty
+    let hasChronicConditions = !biometrics.chronicConditions.isEmpty
+    let hasPhysicalLimitations = !biometrics.physicalLimitations.isEmpty
+    
+    // Intelligent intensity and frequency determination
+    var baseIntensity: ActivityDifficulty = .low
+    var weeklySessions = 3
+    var averageDuration = 20
+    
+    // Calculate fitness score based on multiple factors
+    var fitnessScore = 0
+    
+    // Age factor (younger = higher score)
+    if age < 30 { fitnessScore += 3 }
+    else if age < 50 { fitnessScore += 2 }
+    else if age < 70 { fitnessScore += 1 }
+    
+    // Exercise history factor
+    switch exerciseHistory {
+    case .professional: fitnessScore += 4
+    case .advanced: fitnessScore += 3
+    case .intermediate: fitnessScore += 2
+    case .beginner: fitnessScore += 1
+    case .none: fitnessScore += 0
+    }
+    
+    // Current activity level factor
+    switch currentActivityLevel {
+    case .extremelyActive: fitnessScore += 3
+    case .veryActive: fitnessScore += 2
+    case .moderatelyActive: fitnessScore += 1
+    case .lightlyActive: fitnessScore += 0
+    case .sedentary: fitnessScore -= 1
+    }
+    
+    // Cardiovascular fitness factor
+    switch cardiovascularFitness {
+    case .excellent: fitnessScore += 3
+    case .aboveAverage: fitnessScore += 2
+    case .average: fitnessScore += 1
+    case .belowAverage: fitnessScore += 0
+    case .poor: fitnessScore -= 1
+    }
+    
+    // Energy level factor
+    switch energyLevel {
+    case .veryHigh: fitnessScore += 2
+    case .high: fitnessScore += 1
+    case .moderate: fitnessScore += 0
+    case .low: fitnessScore -= 1
+    case .veryLow: fitnessScore -= 2
+    }
+    
+    // BMI factor
+    if bmi >= 18.5 && bmi <= 24.9 { fitnessScore += 1 }
+    else if bmi > 30 || bmi < 18.5 { fitnessScore -= 1 }
+    
+    // Determine intensity based on fitness score
+    if fitnessScore >= 8 {
+        baseIntensity = .high
+        weeklySessions = 5
+        averageDuration = 45
+    } else if fitnessScore >= 5 {
+        baseIntensity = .medium
+        weeklySessions = 4
+        averageDuration = 35
+    } else if fitnessScore >= 2 {
+        baseIntensity = .low
+        weeklySessions = 3
+        averageDuration = 25
+    } else {
+        baseIntensity = .low
+        weeklySessions = 2
+        averageDuration = 15
+    }
+    
+    // Adjust for health limitations
+    if hasInjuries || hasChronicConditions || hasPhysicalLimitations {
+        baseIntensity = .low
+        averageDuration = max(10, averageDuration - 10)
+        weeklySessions = max(2, weeklySessions - 1)
+    }
+    
+    // Stress and energy adjustments
+    if stressLevel == .high || stressLevel == .veryHigh {
+        baseIntensity = .low
+        averageDuration = max(10, averageDuration - 5)
+        safetyConsiderations.append("High stress levels detected - focus on stress-reducing activities")
+    }
+    
+    // Generate activities based on fitness goals
+    if fitnessGoals.contains(.stressReduction) || stressLevel == .high || stressLevel == .veryHigh {
+        activities.append(RecommendedActivity(
+            name: "Mindful Movement & Breathing",
+            category: .flexibility,
+            duration: 20,
+            intensity: .low,
+            frequency: "Daily",
+            instructions: [
+                "Start with 5 minutes of deep breathing",
+                "Perform gentle yoga poses or tai chi movements",
+                "Focus on slow, controlled movements",
+                "End with 5 minutes of meditation or relaxation"
+            ],
+            benefits: ["Reduces stress hormones", "Improves mental clarity", "Enhances sleep quality"],
+            equipment: ["Yoga mat", "Quiet space"]
+        ))
+    }
+    
+    // Flexibility-focused activities
+    if fitnessGoals.contains(.flexibility) || flexibilityLevel == .poor || flexibilityLevel == .belowAverage {
+        activities.append(RecommendedActivity(
+            name: "Dynamic Flexibility Routine",
+            category: .flexibility,
+            duration: 25,
+            intensity: .low,
+            frequency: "4-5 times per week",
+            instructions: [
+                "Start with 5-minute warm-up",
+                "Perform dynamic stretches for all major muscle groups",
+                "Hold static stretches for 30-60 seconds",
+                "Focus on areas of tightness"
+            ],
+            benefits: ["Improves range of motion", "Reduces injury risk", "Enhances performance"],
+            equipment: ["Yoga mat", "Stretching strap"]
+        ))
+    }
+    
+    // Balance-focused activities
+    if fitnessGoals.contains(.balance) || balanceLevel == .poor || balanceLevel == .fair {
+        activities.append(RecommendedActivity(
+            name: "Balance & Stability Training",
+            category: .balance,
+            duration: 20,
+            intensity: .low,
+            frequency: "3-4 times per week",
+            instructions: [
+                "Start with simple balance exercises",
+                "Progress to single-leg stands",
+                "Include balance board or unstable surface work",
+                "Practice functional movements"
+            ],
+            benefits: ["Prevents falls", "Improves coordination", "Builds confidence"],
+            equipment: ["Balance board", "Wall for support"]
+        ))
+    }
+    
+    // Cardiovascular activities based on fitness level and goals
+    if fitnessGoals.contains(.endurance) || fitnessGoals.contains(.bloodSugarControl) || cardiovascularFitness != .excellent {
+        let cardioIntensity = cardiovascularFitness == .poor ? ActivityDifficulty.low : baseIntensity
+        let cardioDuration = cardiovascularFitness == .poor ? 15 : averageDuration
+        
+            activities.append(RecommendedActivity(
+            name: "Cardiovascular Training",
+            category: .cardio,
+            duration: cardioDuration,
+            intensity: cardioIntensity,
+            frequency: "\(weeklySessions) times per week",
+            instructions: [
+                "Start with 5-minute warm-up at easy pace",
+                "Maintain target heart rate zone (50-70% of max HR)",
+                "Include interval training for advanced users",
+                "Cool down with 5 minutes of easy movement"
+            ],
+            benefits: ["Improves heart health", "Lowers blood sugar", "Burns calories", "Increases endurance"],
+            equipment: ["Heart rate monitor", "Comfortable shoes"]
+        ))
+    }
+    
+    // Strength training based on goals and current level
+    if fitnessGoals.contains(.strength) || fitnessGoals.contains(.muscleGain) || baseIntensity != .low {
+        let strengthIntensity = exerciseHistory == .none ? ActivityDifficulty.low : baseIntensity
+        
+        activities.append(RecommendedActivity(
+            name: "Progressive Strength Training",
+            category: .strength,
+            duration: 30,
+            intensity: strengthIntensity,
+            frequency: "2-3 times per week",
+            instructions: [
+                "Start with bodyweight exercises",
+                "Progress to resistance bands or weights",
+                "Focus on major muscle groups",
+                "Allow 48 hours rest between sessions"
+            ],
+            benefits: ["Builds muscle mass", "Improves insulin sensitivity", "Strengthens bones", "Boosts metabolism"],
+            equipment: ["Resistance bands", "Dumbbells", "Exercise mat"]
+        ))
+    }
+    
+    // Mobility and flexibility for all users
+    if mobilityRange == .limited || mobilityRange == .restricted {
+        activities.append(RecommendedActivity(
+            name: "Adaptive Mobility Routine",
+            category: .lowImpact,
+            duration: 20,
+                intensity: .low,
+                frequency: "Daily",
+                instructions: [
+                "Perform seated or supported exercises",
+                "Focus on gentle range of motion",
+                "Include breathing exercises",
+                "Progress gradually as mobility improves"
+            ],
+            benefits: ["Maintains joint health", "Improves circulation", "Reduces stiffness", "Builds confidence"],
+            equipment: ["Sturdy chair", "Supportive surface"]
+        ))
+    }
+    
+    // Chronic condition-specific modifications
+    if hasChronicConditions {
+        for condition in biometrics.chronicConditions {
+            switch condition {
+            case .hypertension:
+                safetyConsiderations.append("Monitor blood pressure before and after exercise")
+                safetyConsiderations.append("Avoid high-intensity exercises that cause blood pressure spikes")
+            case .heartDisease:
+                safetyConsiderations.append("Consult cardiologist before starting exercise program")
+                safetyConsiderations.append("Start with very low intensity and progress slowly")
+            case .arthritis:
+            activities.append(RecommendedActivity(
+                    name: "Arthritis-Friendly Movement",
+                category: .lowImpact,
+                    duration: 20,
+                    intensity: .low,
+                    frequency: "Daily",
+                    instructions: [
+                        "Perform gentle range of motion exercises",
+                        "Use warm water or heat therapy before exercise",
+                        "Focus on low-impact activities",
+                        "Stop if pain increases during exercise"
+                    ],
+                    benefits: ["Reduces joint stiffness", "Improves mobility", "Decreases pain"],
+                    equipment: ["Warm water", "Heat pack"]
+                ))
+            case .osteoporosis:
+                safetyConsiderations.append("Avoid high-impact activities and forward bending")
+                activities.append(RecommendedActivity(
+                    name: "Bone-Strengthening Exercises",
+                    category: .strength,
+                    duration: 25,
+                intensity: .low,
+                frequency: "3 times per week",
+                instructions: [
+                        "Focus on weight-bearing exercises",
+                        "Include gentle resistance training",
+                        "Practice balance and posture exercises",
+                        "Avoid high-impact activities"
+                    ],
+                    benefits: ["Strengthens bones", "Improves balance", "Reduces fracture risk"],
+                    equipment: ["Light weights", "Resistance bands"]
+                ))
+            case .asthma:
+                safetyConsiderations.append("Have rescue inhaler available during exercise")
+                safetyConsiderations.append("Warm up gradually and cool down properly")
+            case .depression, .anxiety:
+                activities.append(RecommendedActivity(
+                    name: "Mood-Boosting Movement",
+                    category: .cardio,
+                    duration: 30,
+                    intensity: .low,
+                    frequency: "Daily",
+                    instructions: [
+                        "Start with gentle walking or dancing",
+                        "Include outdoor activities when possible",
+                        "Focus on activities you enjoy",
+                        "Practice mindfulness during movement"
+                    ],
+                    benefits: ["Releases endorphins", "Improves mood", "Reduces anxiety", "Boosts energy"],
+                    equipment: ["Comfortable clothes", "Music player"]
+                ))
+            default:
+                break
+            }
+        }
+    }
+    
+    // Physical limitation-specific modifications
+    if hasPhysicalLimitations {
+        for limitation in biometrics.physicalLimitations {
+            switch limitation {
+            case .limitedRangeOfMotion:
+    activities.append(RecommendedActivity(
+                    name: "Range of Motion Therapy",
+                    category: .flexibility,
+                    duration: 20,
+                    intensity: .low,
+                    frequency: "Daily",
+                    instructions: [
+                        "Perform gentle stretching exercises",
+                        "Use assistive devices if needed",
+                        "Progress slowly and consistently",
+                        "Focus on affected areas"
+                    ],
+                    benefits: ["Improves flexibility", "Reduces stiffness", "Enhances mobility"],
+                    equipment: ["Stretching aids", "Supportive devices"]
+                ))
+            case .poorBalance:
+                activities.append(RecommendedActivity(
+                    name: "Balance Enhancement Program",
+                    category: .balance,
+                    duration: 15,
+                    intensity: .low,
+                    frequency: "Daily",
+                    instructions: [
+                        "Start with seated balance exercises",
+                        "Progress to standing with support",
+                        "Practice single-leg stands",
+                        "Use safety equipment and supervision"
+                    ],
+                    benefits: ["Improves balance", "Prevents falls", "Builds confidence"],
+                    equipment: ["Balance board", "Support rails", "Spotter"]
+                ))
+            case .breathingDifficulties:
+                safetyConsiderations.append("Monitor breathing during exercise")
+                safetyConsiderations.append("Stop if shortness of breath occurs")
+                activities.append(RecommendedActivity(
+                    name: "Breathing-Focused Exercise",
+                    category: .lowImpact,
+                    duration: 15,
+                    intensity: .low,
+                    frequency: "Daily",
+                    instructions: [
+                        "Practice diaphragmatic breathing",
+                        "Perform gentle movements with breath",
+                        "Focus on controlled breathing patterns",
+                        "Stop if breathing becomes difficult"
+                    ],
+                    benefits: ["Improves lung function", "Reduces breathlessness", "Enhances relaxation"],
+                    equipment: ["Breathing exercises guide"]
+                ))
+            default:
+                break
+            }
+        }
+    }
+    
+    // Diabetes-specific considerations and activities
+    if fitnessGoals.contains(.bloodSugarControl) {
+        activities.append(RecommendedActivity(
+            name: "Blood Sugar Management Routine",
+        category: .cardio,
+            duration: 30,
+            intensity: .medium,
+            frequency: "Daily",
+        instructions: [
+                "Check blood sugar before and after exercise",
+                "Start with 10-minute walk after meals",
+                "Include both aerobic and resistance exercises",
+                "Monitor for signs of hypoglycemia"
+            ],
+            benefits: ["Lowers blood sugar", "Improves insulin sensitivity", "Reduces diabetes complications"],
+            equipment: ["Blood glucose monitor", "Comfortable shoes"]
+        ))
+    }
+    
+    // Weight management activities
+    if fitnessGoals.contains(.weightLoss) {
+        activities.append(RecommendedActivity(
+            name: "Weight Management Program",
+            category: .cardio,
+            duration: 45,
+            intensity: .medium,
+            frequency: "5 times per week",
+            instructions: [
+                "Combine cardio and strength training",
+                "Include high-intensity interval training",
+                "Focus on compound movements",
+                "Track progress and adjust intensity"
+            ],
+            benefits: ["Burns calories", "Builds lean muscle", "Boosts metabolism", "Improves body composition"],
+            equipment: ["Heart rate monitor", "Weights", "Exercise mat"]
+        ))
+    }
+    
+    // General health and wellness activities
+    if fitnessGoals.contains(.generalHealth) || activities.isEmpty {
+    activities.append(RecommendedActivity(
+            name: "Daily Wellness Routine",
+            category: .lowImpact,
+            duration: 25,
+        intensity: .low,
+        frequency: "Daily",
+        instructions: [
+                "Start with 5-minute warm-up",
+                "Include gentle cardio, strength, and flexibility",
+                "Focus on consistency over intensity",
+                "End with relaxation and breathing"
+            ],
+            benefits: ["Improves overall health", "Boosts energy", "Reduces stress", "Enhances quality of life"],
+            equipment: ["Exercise mat", "Light weights"]
+        ))
+    }
+    
+    // Comprehensive safety considerations
+    if restingHR > 100 {
+        safetyConsiderations.append("Elevated resting heart rate - monitor during exercise and consult doctor if concerned")
+    }
+    
+    if biometrics.bloodPressureSystolic > 140 || biometrics.bloodPressureDiastolic > 90 {
+        safetyConsiderations.append("High blood pressure detected - start with low-intensity activities and monitor closely")
+    }
+    
+    if biometrics.sleepHours < 6 {
+        safetyConsiderations.append("Poor sleep may affect exercise performance - prioritize sleep hygiene and recovery")
+    }
+    
+    if hydrationLevel == .poor {
+        safetyConsiderations.append("Poor hydration detected - ensure adequate fluid intake before, during, and after exercise")
+    }
+    
+    // Disability-specific considerations
+    if hasDisabilities {
+        if biometrics.disabilities.contains(.wheelchair) {
+            activities.append(RecommendedActivity(
+                name: "Adaptive Wheelchair Fitness",
+                category: .lowImpact,
+                duration: 25,
+                intensity: .low,
+                frequency: "3-4 times per week",
+                instructions: [
+                    "Perform upper body strength exercises with resistance bands",
+                    "Do seated cardio movements and arm cycling",
+                    "Include flexibility and stretching for all accessible areas",
+                    "Focus on core strengthening and posture"
+                ],
+                benefits: ["Improves cardiovascular health", "Builds upper body strength", "Maintains mobility", "Enhances independence"],
+                equipment: ["Resistance bands", "Light weights", "Wheelchair-accessible space"]
+            ))
+        }
+        
+        if biometrics.disabilities.contains(.visualImpairment) {
+            safetyConsiderations.append("Ensure exercise area is clear, well-lit, and free of obstacles")
+            safetyConsiderations.append("Consider audio-guided exercises, tactile markers, or a workout partner")
+        }
+    }
+    
+    // General safety reminders
+    safetyConsiderations.append("Always warm up before exercise and cool down afterward")
+    safetyConsiderations.append("Listen to your body and stop if you experience pain, dizziness, or unusual symptoms")
+    safetyConsiderations.append("Stay hydrated and have water available during exercise")
+    safetyConsiderations.append("Consult your healthcare provider before starting any new exercise program")
+    
+    return PersonalizedExercisePlan(
+        activities: activities,
+        weeklySessions: weeklySessions,
+        averageDuration: averageDuration,
+        intensityLevel: baseIntensity,
+        safetyConsiderations: safetyConsiderations
+    )
 }
 
 #Preview {
