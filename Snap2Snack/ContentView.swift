@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+import MapKit
+import CoreLocation
 
 struct ContentView: View {
     @State private var selectedTab = 0
@@ -247,96 +249,33 @@ struct GroceryAssistantView: View {
     }
     
     private func analyzeImage() {
+        guard let image = selectedImage else { return }
+        
         isAnalyzing = true
         analysisResult = ""
         nutritionData = nil
         
-        // Enhanced AI simulation with realistic delays and varied responses
-        DispatchQueue.main.asyncAfter(deadline: .now() + Double.random(in: 1.5...3.0)) {
-            let results = [
-                ScanResult(
-                    foodName: "Fresh Spinach",
-                    isDiabetesFriendly: true,
-                    confidence: 0.94,
-                    recommendation: "✅ Excellent choice! Spinach is very diabetes-friendly with low glycemic index and high fiber content.",
-                    nutritionData: NutritionData(
-                        calories: 23,
-                        carbs: 3.6,
-                        protein: 2.9,
-                        fiber: 2.2,
-                        sugar: 0.4,
-                        glycemicIndex: "Very Low"
-                    )
-                ),
-                ScanResult(
-                    foodName: "Whole Grain Bread",
-                    isDiabetesFriendly: true,
-                    confidence: 0.87,
-                    recommendation: "✅ Good choice! Whole grain bread has moderate carbs but high fiber content helps regulate blood sugar.",
-                    nutritionData: NutritionData(
-                        calories: 69,
-                        carbs: 12.5,
-                        protein: 3.6,
-                        fiber: 1.8,
-                        sugar: 1.1,
-                        glycemicIndex: "Low"
-                    )
-                ),
-                ScanResult(
-                    foodName: "Greek Yogurt",
-                    isDiabetesFriendly: true,
-                    confidence: 0.91,
-                    recommendation: "✅ Great choice! Greek yogurt is high in protein and low in carbs, perfect for diabetes management.",
-                    nutritionData: NutritionData(
-                        calories: 59,
-                        carbs: 3.6,
-                        protein: 10.0,
-                        fiber: 0.0,
-                        sugar: 3.2,
-                        glycemicIndex: "Low"
-                    )
-                ),
-                ScanResult(
-                    foodName: "Soda",
-                    isDiabetesFriendly: false,
-                    confidence: 0.96,
-                    recommendation: "❌ Avoid! High sugar content will cause rapid blood sugar spikes. Choose water or unsweetened beverages instead.",
-                    nutritionData: NutritionData(
-                        calories: 150,
-                        carbs: 39.0,
-                        protein: 0.0,
-                        fiber: 0.0,
-                        sugar: 39.0,
-                        glycemicIndex: "Very High"
-                    )
-                ),
-                ScanResult(
-                    foodName: "White Rice",
-                    isDiabetesFriendly: false,
-                    confidence: 0.89,
-                    recommendation: "⚠️ Limit intake! White rice has high glycemic index. Choose brown rice or quinoa for better blood sugar control.",
-                    nutritionData: NutritionData(
-                        calories: 130,
-                        carbs: 28.0,
-                        protein: 2.7,
-                        fiber: 0.4,
-                        sugar: 0.1,
-                        glycemicIndex: "High"
-                    )
-                )
-            ]
-            
-            let selectedResult = results.randomElement()!
-            analysisResult = selectedResult.recommendation
-            nutritionData = selectedResult.nutritionData
-            
-            // Add to scan history
-            scanHistory.insert(selectedResult, at: 0)
-            if scanHistory.count > 10 {
-                scanHistory = Array(scanHistory.prefix(10))
+        // Call the API service
+        APIService.shared.analyzeFoodImage(image) { result in
+            DispatchQueue.main.async {
+                isAnalyzing = false
+                
+                switch result {
+                case .success(let scanResult):
+                    analysisResult = scanResult.recommendation
+                    nutritionData = scanResult.nutritionData
+                    
+                    // Add to scan history
+                    scanHistory.insert(scanResult, at: 0)
+                    if scanHistory.count > 10 {
+                        scanHistory = Array(scanHistory.prefix(10))
+                    }
+                    
+                case .failure(let error):
+                    analysisResult = "❌ Analysis failed: \(error.localizedDescription)"
+                    nutritionData = nil
+                }
             }
-            
-            isAnalyzing = false
         }
     }
     
@@ -374,7 +313,7 @@ struct ScanResult: Identifiable {
     let timestamp = Date()
 }
 
-struct NutritionData {
+struct NutritionData: Codable {
     let calories: Int
     let carbs: Double
     let protein: Double
@@ -730,120 +669,47 @@ struct FridgeScanView: View {
     }
     
     private func scanFridge() {
+        guard let image = selectedImage else { return }
+        
         isScanning = true
         mealSuggestions = []
         detectedFoods = []
         
-        // Enhanced AI simulation with realistic food detection
-        DispatchQueue.main.asyncAfter(deadline: .now() + Double.random(in: 2.0...4.0)) {
-            // Simulate detected foods
-            detectedFoods = [
-                DetectedFood(name: "Chicken Breast", confidence: 0.95, category: "Protein", isFresh: true),
-                DetectedFood(name: "Spinach", confidence: 0.92, category: "Vegetables", isFresh: true),
-                DetectedFood(name: "Greek Yogurt", confidence: 0.89, category: "Dairy", isFresh: true),
-                DetectedFood(name: "Quinoa", confidence: 0.87, category: "Grains", isFresh: true),
-                DetectedFood(name: "Tomatoes", confidence: 0.91, category: "Vegetables", isFresh: true),
-                DetectedFood(name: "Eggs", confidence: 0.94, category: "Protein", isFresh: true)
-            ]
-            
-            // Generate meal suggestions based on detected foods
-            mealSuggestions = [
-                MealSuggestion(
-                    name: "Grilled Chicken Quinoa Bowl",
-                    description: "High-protein bowl with grilled chicken, quinoa, and fresh vegetables. Perfect for maintaining stable blood sugar levels.",
-                    cookingTime: "25 min",
-                    difficulty: "Easy",
-                    glycemicIndex: "Low",
-                    calories: "420",
-                    protein: "35g",
-                    carbs: "28g",
-                    fiber: "8g",
-                    ingredients: ["Chicken Breast", "Quinoa", "Spinach", "Tomatoes"],
-                    instructions: [
-                        "Season chicken breast with herbs and grill for 6-8 minutes per side",
-                        "Cook quinoa according to package instructions",
-                        "Sauté spinach and tomatoes in olive oil",
-                        "Combine all ingredients in a bowl and serve"
-                    ],
-                    nutritionBenefits: "High protein content helps regulate blood sugar, while quinoa provides complex carbohydrates with low glycemic impact."
-                ),
-                MealSuggestion(
-                    name: "Protein-Packed Spinach Salad",
-                    description: "Fresh spinach salad with hard-boiled eggs and Greek yogurt dressing. Low-carb option rich in nutrients.",
-                    cookingTime: "15 min",
-                    difficulty: "Easy",
-                    glycemicIndex: "Very Low",
-                    calories: "280",
-                    protein: "22g",
-                    carbs: "12g",
-                    fiber: "6g",
-                    ingredients: ["Spinach", "Eggs", "Greek Yogurt", "Tomatoes"],
-                    instructions: [
-                        "Hard-boil eggs for 10 minutes, then slice",
-                        "Wash and prepare fresh spinach",
-                        "Mix Greek yogurt with herbs for dressing",
-                        "Assemble salad and drizzle with dressing"
-                    ],
-                    nutritionBenefits: "Spinach is rich in fiber and antioxidants, while eggs provide high-quality protein for blood sugar stability."
-                ),
-                MealSuggestion(
-                    name: "Greek Yogurt Parfait",
-                    description: "Layered Greek yogurt with fresh berries and nuts. High-protein breakfast that won't spike blood sugar.",
-                    cookingTime: "5 min",
-                    difficulty: "Easy",
-                    glycemicIndex: "Low",
-                    calories: "320",
-                    protein: "28g",
-                    carbs: "18g",
-                    fiber: "4g",
-                    ingredients: ["Greek Yogurt", "Berries", "Nuts", "Honey (optional)"],
-                    instructions: [
-                        "Layer Greek yogurt in a glass or bowl",
-                        "Add fresh berries and a drizzle of honey if desired",
-                        "Top with crushed nuts for added protein and healthy fats",
-                        "Serve immediately for best texture"
-                    ],
-                    nutritionBenefits: "Greek yogurt is high in protein and probiotics, helping maintain stable blood sugar and gut health."
-                ),
-                MealSuggestion(
-                    name: "Vegetable Frittata",
-                    description: "Fluffy egg frittata loaded with fresh vegetables. Perfect for any meal with excellent protein balance.",
-                    cookingTime: "20 min",
-                    difficulty: "Medium",
-                    glycemicIndex: "Very Low",
-                    calories: "380",
-                    protein: "26g",
-                    carbs: "14g",
-                    fiber: "5g",
-                    ingredients: ["Eggs", "Spinach", "Tomatoes", "Cheese"],
-                    instructions: [
-                        "Whisk eggs with salt and pepper",
-                        "Sauté vegetables in an oven-safe pan",
-                        "Pour egg mixture over vegetables",
-                        "Cook on stovetop, then finish under broiler"
-                    ],
-                    nutritionBenefits: "Eggs provide complete protein while vegetables add fiber and nutrients, creating a balanced meal for diabetes management."
-                )
-            ]
-            
-            // Add to scan history
-            let newScan = FridgeScan(
-                timestamp: Date(),
-                detectedFoods: detectedFoods,
-                generatedMeals: mealSuggestions.count
-            )
-            scanHistory.insert(newScan, at: 0)
-            if scanHistory.count > 5 {
-                scanHistory = Array(scanHistory.prefix(5))
+        // Call the API service
+        APIService.shared.analyzeFridgeImage(image) { result in
+            DispatchQueue.main.async {
+                isScanning = false
+                
+                switch result {
+                case .success(let fridgeResult):
+                    detectedFoods = fridgeResult.detectedFoods
+                    mealSuggestions = fridgeResult.mealSuggestions
+                    
+                    // Add to scan history
+                    let newScan = FridgeScan(
+                        timestamp: Date(),
+                        detectedFoods: fridgeResult.detectedFoods,
+                        generatedMeals: fridgeResult.mealSuggestions.count
+                    )
+                    scanHistory.insert(newScan, at: 0)
+                    if scanHistory.count > 5 {
+                        scanHistory = Array(scanHistory.prefix(5))
+                    }
+                    
+                case .failure(_):
+                    // Show error state
+                    detectedFoods = [
+                        DetectedFood(name: "Scan Failed", confidence: 0.0, category: "Error", isFresh: false)
+                    ]
+                    mealSuggestions = []
+                }
             }
-            
-            isScanning = false
         }
     }
 }
 
 // MARK: - Enhanced Data Models
-struct DetectedFood: Identifiable {
+struct DetectedFood: Identifiable, Codable {
     let id = UUID()
     let name: String
     let confidence: Double
@@ -1509,117 +1375,411 @@ struct ActivityView: View {
     }
 }
 
-// MARK: - Resources View
+// MARK: - Resources View with MapKit
 struct ResourcesView: View {
-    @State private var resources: [Resource] = []
-    @State private var searchText = ""
+    @StateObject private var locationManager = LocationManager()
+    @State private var searchResults: [MKMapItem] = []
+    @State private var region = MKCoordinateRegion(
+        center: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194), // Default to San Francisco
+        span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
+    )
+    @State private var showingLocationAlert = false
+    @State private var isSearching = false
     
     var body: some View {
         NavigationView {
             ScrollView {
-                VStack(spacing: 20) {
+                VStack(spacing: 0) {
                     // Header
                     VStack(spacing: 12) {
                         Image(systemName: "map.circle.fill")
-                            .font(.system(size: 60))
+                            .font(.system(size: 40))
                             .foregroundColor(.green)
                         
                         Text("Local Resources")
-                            .font(.largeTitle)
+                            .font(.title2)
                             .fontWeight(.bold)
                             .foregroundColor(.green)
-                            .multilineTextAlignment(.center)
                         
-                        Text("Find diabetes clinics, dietitians, and support groups near you")
-                            .font(.subheadline)
+                        Text("Find diabetes clinics, hospitals, and dietitians near you")
+                            .font(.caption)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)
                     }
-                    .frame(maxWidth: .infinity)
+                    .padding(.top, 10)
+                    .padding(.bottom, 8)
                     
-                    // Search Bar
-                    HStack {
-                        Image(systemName: "magnifyingglass")
-                            .foregroundColor(.secondary)
-                        
-                        TextField("Placeholder for resource search", text: $searchText)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                    }
-                    .padding(.horizontal)
-                    .frame(maxWidth: .infinity)
-                    
-                    // Resources List
-                    if resources.isEmpty {
-                        VStack(spacing: 12) {
-                            Image(systemName: "building.2")
-                                .font(.system(size: 40))
-                                .foregroundColor(.secondary)
-                            
-                            Text("No resources found")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                            
-                            Text("Placeholder for local diabetes resources")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                        .padding()
-                        .background(Color.gray.opacity(0.1))
-                        .cornerRadius(12)
-                        .padding(.horizontal)
-                    } else {
-                        LazyVStack(spacing: 12) {
-                            ForEach(resources) { resource in
-                                ResourceCard(resource: resource)
-                                    .padding(.horizontal)
+                    // Map View
+                    Map(coordinateRegion: $region, annotationItems: searchResults) { item in
+                        MapAnnotation(coordinate: item.placemark.coordinate) {
+                            VStack {
+                                Image(systemName: getAnnotationIcon(for: item))
+                                    .foregroundColor(.white)
+                                    .font(.system(size: 16, weight: .bold))
+                                    .frame(width: 30, height: 30)
+                                    .background(getAnnotationColor(for: item))
+                                    .clipShape(Circle())
+                                    .overlay(
+                                        Circle()
+                                            .stroke(Color.white, lineWidth: 2)
+                                    )
+                                
+                                Text(item.name ?? "Unknown")
+                                    .font(.caption2)
+                                    .fontWeight(.medium)
+                                    .foregroundColor(.primary)
+                                    .padding(.horizontal, 4)
+                                    .padding(.vertical, 2)
+                                    .background(Color.white.opacity(0.9))
+                                    .cornerRadius(4)
                             }
                         }
                     }
+                    .frame(height: 300)
+                    .onAppear {
+                        requestLocationPermission()
+                    }
+                    .onChange(of: locationManager.location) { newLocation in
+                        if let location = newLocation {
+                            region.center = location.coordinate
+                            searchNearbyResources()
+                        }
+                    }
                     
-                    Spacer(minLength: 100)
+                    // Search Button - positioned lower
+                    Button(action: searchNearbyResources) {
+                        HStack {
+                            if isSearching {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                            } else {
+                                Image(systemName: "magnifyingglass")
+                            }
+                            Text(isSearching ? "Searching..." : "Find Nearby Resources")
+                        }
+                        .foregroundColor(.white)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.green)
+                        .cornerRadius(12)
+                    }
+                    .padding(.horizontal)
+                    .padding(.top, 16)
+                    .padding(.bottom, 8)
+                    .disabled(isSearching)
+                    
+                    // Resources List
+                    if !searchResults.isEmpty {
+                        VStack(alignment: .leading, spacing: 12) {
+                            HStack {
+                                Text("Nearby Resources")
+                                    .font(.headline)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.green)
+                                
+                                Spacer()
+                                
+                                Text("\(searchResults.count) found")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding(.horizontal)
+                            .padding(.top, 16)
+                            
+                            LazyVStack(spacing: 12) {
+                                ForEach(searchResults, id: \.id) { item in
+                                    ResourceListItem(item: item)
+                                        .padding(.horizontal)
+                                }
+                            }
+                        }
+                    } else if !isSearching {
+                        VStack(spacing: 12) {
+                            Image(systemName: "location.circle")
+                                .font(.system(size: 40))
+                                .foregroundColor(.secondary)
+                            
+                            Text("No resources found yet")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                            
+                            Text("Tap 'Find Nearby Resources' to search for diabetes clinics, hospitals, and dietitians in your area")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal)
+                        }
+                        .padding(.top, 20)
+                        .padding(.bottom, 20)
+                    }
+                    
+                    Spacer(minLength: 50)
                 }
-                .padding(.top)
             }
             .navigationBarHidden(true)
         }
-        .onAppear {
-            loadSampleResources()
+        .alert("Location Access Required", isPresented: $showingLocationAlert) {
+            Button("Settings") {
+                if let settingsUrl = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(settingsUrl)
+                }
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("Please enable location access in Settings to find nearby diabetes resources.")
         }
     }
     
-    private func loadSampleResources() {
-        resources = [
-            Resource(
-                name: "Diabetes Care Center",
-                type: "Clinic",
-                address: "Placeholder for clinic address",
-                phone: "Placeholder for phone number",
-                acceptsInsurance: true,
-                cost: "Placeholder for cost information"
-            ),
-            Resource(
-                name: "Nutrition Specialist",
-                type: "Dietitian",
-                address: "Placeholder for dietitian address",
-                phone: "Placeholder for phone number",
-                acceptsInsurance: false,
-                cost: "Placeholder for cost information"
-            ),
-            Resource(
-                name: "Diabetes Support Group",
-                type: "Support Group",
-                address: "Placeholder for support group location",
-                phone: "Placeholder for phone number",
-                acceptsInsurance: true,
-                cost: "Free"
+    private func requestLocationPermission() {
+        locationManager.requestLocationPermission { granted in
+            if !granted {
+                showingLocationAlert = true
+            }
+        }
+    }
+    
+    private func searchNearbyResources() {
+        guard let location = locationManager.location else {
+            showingLocationAlert = true
+            return
+        }
+        
+        isSearching = true
+        searchResults.removeAll()
+        
+        let searchTerms = ["diabetes clinic", "hospital", "dietitian"]
+        let group = DispatchGroup()
+        
+        for term in searchTerms {
+            group.enter()
+            let request = MKLocalSearch.Request()
+            request.naturalLanguageQuery = term
+            request.region = MKCoordinateRegion(
+                center: location.coordinate,
+                span: MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1)
             )
-        ]
+            
+            let search = MKLocalSearch(request: request)
+            search.start { response, error in
+                defer { group.leave() }
+                
+                if let response = response {
+                    DispatchQueue.main.async {
+                        searchResults.append(contentsOf: response.mapItems)
+                    }
+                }
+            }
+        }
+        
+        group.notify(queue: .main) {
+            isSearching = false
+            // Update region to show all results
+            if !searchResults.isEmpty {
+                let coordinates = searchResults.map { $0.placemark.coordinate }
+                let minLat = coordinates.map { $0.latitude }.min() ?? location.coordinate.latitude
+                let maxLat = coordinates.map { $0.latitude }.max() ?? location.coordinate.latitude
+                let minLon = coordinates.map { $0.longitude }.min() ?? location.coordinate.longitude
+                let maxLon = coordinates.map { $0.longitude }.max() ?? location.coordinate.longitude
+                
+                let center = CLLocationCoordinate2D(
+                    latitude: (minLat + maxLat) / 2,
+                    longitude: (minLon + maxLon) / 2
+                )
+                let span = MKCoordinateSpan(
+                    latitudeDelta: max(maxLat - minLat, 0.01) * 1.2,
+                    longitudeDelta: max(maxLon - minLon, 0.01) * 1.2
+                )
+                
+                region = MKCoordinateRegion(center: center, span: span)
+            }
+        }
+    }
+    
+    private func getAnnotationIcon(for item: MKMapItem) -> String {
+        let name = item.name?.lowercased() ?? ""
+        if name.contains("diabetes") || name.contains("clinic") {
+            return "cross.circle.fill"
+        } else if name.contains("hospital") {
+            return "building.2.fill"
+        } else if name.contains("dietitian") || name.contains("nutrition") {
+            return "leaf.fill"
+        } else {
+            return "mappin.circle.fill"
+        }
+    }
+    
+    private func getAnnotationColor(for item: MKMapItem) -> Color {
+        let name = item.name?.lowercased() ?? ""
+        if name.contains("diabetes") || name.contains("clinic") {
+            return .green
+        } else if name.contains("hospital") {
+            return .red
+        } else if name.contains("dietitian") || name.contains("nutrition") {
+            return .orange
+        } else {
+            return .blue
+        }
+    }
+}
+
+// MARK: - MKMapItem Extension
+extension MKMapItem: Identifiable {
+    public var id: String {
+        return "\(placemark.coordinate.latitude)-\(placemark.coordinate.longitude)-\(name ?? "unknown")"
+    }
+}
+
+// MARK: - Resource List Item View
+struct ResourceListItem: View {
+    let item: MKMapItem
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .top, spacing: 12) {
+                // Icon
+                Image(systemName: getIcon(for: item))
+                    .foregroundColor(.white)
+                    .font(.system(size: 16, weight: .bold))
+                    .frame(width: 32, height: 32)
+                    .background(getColor(for: item))
+                    .clipShape(Circle())
+                
+                // Content
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(item.name ?? "Unknown Location")
+                        .font(.headline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.primary)
+                        .lineLimit(2)
+                    
+                    if let address = item.placemark.title {
+                        Text(address)
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                            .lineLimit(2)
+                    }
+                    
+                    HStack {
+                        Text(getCategory(for: item))
+                            .font(.caption)
+                            .fontWeight(.medium)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(getColor(for: item).opacity(0.2))
+                            .foregroundColor(getColor(for: item))
+                            .cornerRadius(8)
+                        
+                        Spacer()
+                        
+                        if let phone = item.phoneNumber {
+                            Button(action: {
+                                if let url = URL(string: "tel:\(phone)") {
+                                    UIApplication.shared.open(url)
+                                }
+                            }) {
+                                Image(systemName: "phone.fill")
+                                    .foregroundColor(.green)
+                                    .font(.system(size: 14))
+                            }
+                        }
+                    }
+                }
+                
+                Spacer()
+            }
+        }
+        .padding()
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 1)
+    }
+    
+    private func getIcon(for item: MKMapItem) -> String {
+        let name = item.name?.lowercased() ?? ""
+        if name.contains("diabetes") || name.contains("clinic") {
+            return "cross.circle.fill"
+        } else if name.contains("hospital") {
+            return "building.2.fill"
+        } else if name.contains("dietitian") || name.contains("nutrition") {
+            return "leaf.fill"
+        } else {
+            return "mappin.circle.fill"
+        }
+    }
+    
+    private func getColor(for item: MKMapItem) -> Color {
+        let name = item.name?.lowercased() ?? ""
+        if name.contains("diabetes") || name.contains("clinic") {
+            return .green
+        } else if name.contains("hospital") {
+            return .red
+        } else if name.contains("dietitian") || name.contains("nutrition") {
+            return .orange
+        } else {
+            return .blue
+        }
+    }
+    
+    private func getCategory(for item: MKMapItem) -> String {
+        let name = item.name?.lowercased() ?? ""
+        if name.contains("diabetes") || name.contains("clinic") {
+            return "Diabetes Clinic"
+        } else if name.contains("hospital") {
+            return "Hospital"
+        } else if name.contains("dietitian") || name.contains("nutrition") {
+            return "Dietitian"
+        } else {
+            return "Healthcare"
+        }
+    }
+}
+
+// MARK: - Location Manager
+class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
+    private let locationManager = CLLocationManager()
+    @Published var location: CLLocation?
+    @Published var authorizationStatus: CLAuthorizationStatus = .notDetermined
+    
+    override init() {
+        super.init()
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+    }
+    
+    func requestLocationPermission(completion: @escaping (Bool) -> Void) {
+        switch authorizationStatus {
+        case .notDetermined:
+            locationManager.requestWhenInUseAuthorization()
+        case .denied, .restricted:
+            completion(false)
+        case .authorizedWhenInUse, .authorizedAlways:
+            locationManager.requestLocation()
+            completion(true)
+        @unknown default:
+            completion(false)
+        }
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        guard let location = locations.last else { return }
+        self.location = location
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print("Location error: \(error.localizedDescription)")
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+        authorizationStatus = status
+        if status == .authorizedWhenInUse || status == .authorizedAlways {
+            locationManager.requestLocation()
+        }
     }
 }
 
 // MARK: - Supporting Views and Models
-struct MealSuggestion: Identifiable {
+struct MealSuggestion: Identifiable, Codable {
     let id = UUID()
     let name: String
     let description: String
