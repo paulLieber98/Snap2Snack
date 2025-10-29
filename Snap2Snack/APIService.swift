@@ -245,10 +245,38 @@ class APIService: ObservableObject {
         do {
             // Try to parse JSON response
             if let jsonData = content.data(using: .utf8) {
-                let jsonResponse = try JSONDecoder().decode(FridgeAnalysisResponse.self, from: jsonData)
+                let jsonResponse = try JSONDecoder().decode(FridgeAnalysisResponseCodable.self, from: jsonData)
+                
+                // Convert Codable structs to non-Codable structs
+                let detectedFoods = jsonResponse.detectedFoods.map { codableFood in
+                    DetectedFood(
+                        name: codableFood.name,
+                        confidence: codableFood.confidence,
+                        category: codableFood.category,
+                        isFresh: codableFood.isFresh
+                    )
+                }
+                
+                let mealSuggestions = jsonResponse.mealSuggestions.map { codableMeal in
+                    MealSuggestion(
+                        name: codableMeal.name,
+                        description: codableMeal.description,
+                        cookingTime: codableMeal.cookingTime,
+                        difficulty: codableMeal.difficulty,
+                        glycemicIndex: codableMeal.glycemicIndex,
+                        calories: codableMeal.calories,
+                        protein: codableMeal.protein ?? "",
+                        carbs: codableMeal.carbs ?? "",
+                        fiber: codableMeal.fiber ?? "",
+                        ingredients: codableMeal.ingredients ?? [],
+                        instructions: codableMeal.instructions ?? [],
+                        nutritionBenefits: codableMeal.nutritionBenefits ?? ""
+                    )
+                }
+                
                 return FridgeAnalysisResult(
-                    detectedFoods: jsonResponse.detectedFoods,
-                    mealSuggestions: jsonResponse.mealSuggestions
+                    detectedFoods: detectedFoods,
+                    mealSuggestions: mealSuggestions
                 )
             }
         } catch {
@@ -315,7 +343,35 @@ struct GroceryAnalysisResponse: Codable {
     let nutritionData: NutritionData
 }
 
-struct FridgeAnalysisResponse: Codable {
+// Codable version for JSON parsing
+struct FridgeAnalysisResponseCodable: Codable {
+    let detectedFoods: [DetectedFoodCodable]
+    let mealSuggestions: [MealSuggestionCodable]
+}
+
+struct DetectedFoodCodable: Codable {
+    let name: String
+    let confidence: Double
+    let category: String
+    let isFresh: Bool
+}
+
+struct MealSuggestionCodable: Codable {
+    let name: String
+    let description: String
+    let cookingTime: String
+    let difficulty: String
+    let glycemicIndex: String
+    let calories: String
+    let protein: String?
+    let carbs: String?
+    let fiber: String?
+    let ingredients: [String]?
+    let instructions: [String]?
+    let nutritionBenefits: String?
+}
+
+struct FridgeAnalysisResponse {
     let detectedFoods: [DetectedFood]
     let mealSuggestions: [MealSuggestion]
 }

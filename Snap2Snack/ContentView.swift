@@ -709,7 +709,7 @@ struct FridgeScanView: View {
 }
 
 // MARK: - Enhanced Data Models
-struct DetectedFood: Identifiable, Codable {
+struct DetectedFood: Identifiable {
     let id = UUID()
     let name: String
     let confidence: Double
@@ -1779,7 +1779,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
 }
 
 // MARK: - Supporting Views and Models
-struct MealSuggestion: Identifiable, Codable {
+struct MealSuggestion: Identifiable {
     let id = UUID()
     let name: String
     let description: String
