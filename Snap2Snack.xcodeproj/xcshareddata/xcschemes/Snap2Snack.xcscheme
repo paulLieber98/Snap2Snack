@@ -78,7 +78,7 @@
          <EnvironmentVariable
             key = "OPENAI_API_KEY"
             value = "***REMOVED***"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </EnvironmentVariable>
       </EnvironmentVariables>
    </LaunchAction>

@@ -1,2 +1,17 @@
+# Xcode user-specific data (prevents committing local schemes and env vars)
+Snap2Snack.xcodeproj/xcuserdata/
+*.xcuserdatad/
+xcuserdata/
+
+# Derived data
+DerivedData/
+
+# SwiftPM build artifacts
+.build/
+
+# Ignore any local API key files if created
+.env
+.env.local
+*.secret
 *.xcodeproj/xcuserdata/
 *.xcodeproj/project.xcworkspace/xcuserdata/
