@@ -581,16 +581,6 @@ struct MealSuggestionCodable: Codable {
     let nutritionBenefits: String?
 }
 
-struct FridgeAnalysisResponse {
-    let detectedFoods: [DetectedFood]
-    let mealSuggestions: [MealSuggestion]
-}
-
-struct FridgeAnalysisResult {
-    let detectedFoods: [DetectedFood]
-    let mealSuggestions: [MealSuggestion]
-}
-
 // MARK: - Error Types
 enum APIError: Error, LocalizedError {
     case missingAPIKey
